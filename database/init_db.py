@@ -18,32 +18,36 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 def init_database():
     """Initialize database with tables and default data"""
     print("Creating database tables...")
+    Base.metadata.drop_all(bind=engine)  # Drop existing tables
     Base.metadata.create_all(bind=engine)
     
     db = SessionLocal()
     try:
-        # Check if data already exists
-        if db.query(Student).first():
-            print("Database already initialized with student data.")
-            return
-        
         print("Populating database with student credentials...")
         
         # Create students for each standard and section
         standards = ["10th", "11th", "12th"]
         sections = ["A", "B"]
         
+        # Better student names
+        first_names = [
+            "Rahul", "Priya", "Aarav", "Anita", "Arjun", "Kavya", "Ravi", "Sneha", 
+            "Vikram", "Meera", "Suresh", "Divya", "Kiran", "Pooja", "Manoj", "Lakshmi",
+            "Rajesh", "Deepika", "Amit", "Sita"
+        ]
+        
         student_id = 1
         for standard in standards:
             for section in sections:
-                for roll_num in range(1, 21):  # 20 students per section
+                for i in range(20):  # 20 students per section (back to original)
+                    roll_num = i + 1
                     username = f"student_{standard.lower()}_{section.lower()}_{roll_num:02d}"
-                    password = f"pass{roll_num:02d}"  # Shorter password
+                    password = f"pass{roll_num:02d}"
                     
                     student = Student(
                         username=username,
                         password_hash=get_password_hash(password),
-                        first_name=f"Student{roll_num}",
+                        first_name=first_names[i],
                         last_name=f"{standard}{section}",
                         email=f"{username}@evalmate.edu",
                         standard=standard,
@@ -56,27 +60,19 @@ def init_database():
                         print(f"Created {student_id} students...")
                     student_id += 1
         
-        # Create sample examiners
-        examiners_data = [
-            {"username": "examiner_math", "password": "math123", "first_name": "John", "last_name": "Smith", "subject": "Mathematics", "email": "john.smith@evalmate.edu"},
-            {"username": "examiner_science", "password": "science123", "first_name": "Jane", "last_name": "Doe", "subject": "Science", "email": "jane.doe@evalmate.edu"},
-            {"username": "examiner_english", "password": "english123", "first_name": "Robert", "last_name": "Johnson", "subject": "English", "email": "robert.johnson@evalmate.edu"},
-            {"username": "examiner_history", "password": "history123", "first_name": "Mary", "last_name": "Williams", "subject": "History", "email": "mary.williams@evalmate.edu"},
-        ]
-        
-        for examiner_data in examiners_data:
-            examiner = Examiner(
-                username=examiner_data["username"],
-                password_hash=get_password_hash(examiner_data["password"]),
-                first_name=examiner_data["first_name"],
-                last_name=examiner_data["last_name"],
-                subject=examiner_data["subject"],
-                email=examiner_data["email"]
-            )
-            db.add(examiner)
+        # Create single examiner with admin credentials (old version)
+        examiner = Examiner(
+            username="admin",
+            password_hash=get_password_hash("admin123"),
+            first_name="Admin",
+            last_name="User",
+            subject="All Subjects",
+            email="admin@evalmate.edu"
+        )
+        db.add(examiner)
         
         db.commit()
-        print(f"Successfully created {student_id - 1} students and {len(examiners_data)} examiners!")
+        print(f"Successfully created {student_id - 1} students and 1 examiner!")
         
         # Print sample credentials
         print("\n=== SAMPLE CREDENTIALS ===")
@@ -84,9 +80,8 @@ def init_database():
         print("Username: student_10th_a_01 | Password: pass01")
         print("Username: student_11th_b_15 | Password: pass15")
         print("Username: student_12th_a_20 | Password: pass20")
-        print("\nEXAMINERS:")
-        for examiner_data in examiners_data:
-            print(f"Username: {examiner_data['username']} | Password: {examiner_data['password']} | Subject: {examiner_data['subject']}")
+        print("\nEXAMINER:")
+        print("Username: admin | Password: admin123 | Subject: All Subjects")
         
     except Exception as e:
         print(f"Error initializing database: {e}")

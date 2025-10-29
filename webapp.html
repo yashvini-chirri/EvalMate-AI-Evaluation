@@ -383,6 +383,204 @@
             background: #e3f2fd;
             transform: translateY(-2px);
         }
+        
+        .test-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .test-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .test-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .student-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .student-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            border-left: 4px solid #1976d2;
+        }
+
+        .student-info-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #1976d2, #42a5f5);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .student-details h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .student-details p {
+            margin: 0;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .student-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .upload-section {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .upload-section .form-group {
+            margin-bottom: 20px;
+        }
+
+        .upload-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .upload-section input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section input[type="file"]:hover {
+            border-color: #1976d2;
+            background: #f0f7ff;
+        }
+
+        .file-hint {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .upload-button {
+            width: 100%;
+            background: linear-gradient(45deg, #1976d2, #42a5f5);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-button:hover:not(:disabled) {
+            background: linear-gradient(45deg, #1565c0, #1976d2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(25,118,210,0.3);
+        }
+
+        .upload-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .selected-student-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .evaluation-summary {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .evaluation-summary h5 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .evaluation-summary ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .evaluation-summary li {
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        .action-buttons {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -533,10 +731,61 @@
                     <div class="section-card" onclick="selectSection('A')">
                         <span style="font-size: 2em; display: block; margin-bottom: 15px;">📚</span>
                         <h3>Section A</h3>
-                        <p>20 Students</p>
+                        <p>15 Students</p>
                     </div>
                     <div class="section-card" onclick="selectSection('B')">
                         <span style="font-size: 2em; display: block; margin-bottom: 15px;">📖</span>
+                        <h3>Section B</h3>
+                        <p>15 Students</p>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="navigateTo('availableTestsPage')">← Back to Tests</button>
+                </div>
+            </div>
+            
+            <!-- Page 7: Student Selection -->
+            <div class="page" id="studentSelectionPage">
+                <h2 style="color: #333; margin-bottom: 30px;" id="studentTitle">Select Student</h2>
+                
+                <div id="studentsList">
+                    <!-- Students will be loaded here dynamically -->
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="navigateTo('sectionSelectionPage')">← Back to Sections</button>
+                </div>
+            </div>
+            
+            <!-- Page 8: Answer Sheet Upload -->
+            <div class="page" id="answerSheetUploadPage">
+                <h2 style="color: #333; margin-bottom: 30px;" id="uploadTitle">Upload Answer Sheet</h2>
+                
+                <div class="upload-info">
+                    <div class="student-info" id="selectedStudentInfo">
+                        <!-- Student information will be displayed here -->
+                    </div>
+                </div>
+                
+                <div class="upload-section">
+                    <div class="form-group">
+                        <label for="answerSheetFile">Select Answer Sheet:</label>
+                        <input type="file" id="answerSheetFile" accept=".pdf,.jpg,.jpeg,.png" required>
+                        <p class="file-hint">Supported formats: PDF, JPG, PNG (Max: 10MB)</p>
+                    </div>
+                    
+                    <button class="btn btn-full upload-button" onclick="uploadAndEvaluateAnswerSheet()">
+                        🔍 Upload and Evaluate Answer Sheet
+                    </button>
+                </div>
+                
+                <div id="uploadEvaluationResult" style="margin-top: 20px;"></div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-secondary" onclick="navigateTo('studentSelectionPage')">← Back to Students</button>
+                </div>
+            </div>
                         <h3>Section B</h3>
                         <p>20 Students</p>
                     </div>
@@ -615,6 +864,12 @@
         let currentStudent = null;
         let pageHistory = [];
 
+        // Debug function to test student loading
+        window.testStudentLoading = function() {
+            console.log('Testing student loading...');
+            loadStudentsForSection('10th', 'A');
+        };
+
         // Navigation functions
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
@@ -665,7 +920,7 @@
                 container.innerHTML = `
                     <div style="cursor: pointer; padding: 10px; background: white; margin: 5px 0; border-radius: 5px;" 
                          onclick="fillCredentials('admin', 'admin123')">
-                        <strong>admin</strong> / admin123 <em>(Main Examiner)</em>
+                        <strong>admin</strong> / admin123 <em>(Administrator - All Subjects)</em>
                     </div>
                 `;
             } else {
@@ -702,14 +957,7 @@
             try {
                 let endpoint;
                 if (currentUserType === 'examiner') {
-                    // For examiner, use simple credential check
-                    if (username === 'admin' && password === 'admin123') {
-                        currentUser = { username: 'admin', name: 'Main Examiner' };
-                        navigateTo('examinerDashboard');
-                        return;
-                    } else {
-                        throw new Error('Invalid examiner credentials');
-                    }
+                    endpoint = `${API_BASE}/api/auth/login/examiner`;
                 } else {
                     endpoint = `${API_BASE}/api/auth/login/student`;
                 }
@@ -727,8 +975,17 @@
                 
                 if (response.ok) {
                     currentUser = data;
-                    navigateTo('studentDashboard');
-                    loadStudentResults();
+                    // Store authentication data
+                    localStorage.setItem('access_token', data.access_token);
+                    localStorage.setItem('user_type', data.user_type);
+                    localStorage.setItem('current_user_data', JSON.stringify(data));
+                    
+                    if (currentUserType === 'examiner') {
+                        navigateTo('examinerDashboard');
+                    } else {
+                        navigateTo('studentDashboard');
+                        loadStudentResults();
+                    }
                 } else {
                     throw new Error(data.detail || 'Login failed');
                 }
@@ -780,47 +1037,64 @@
         document.getElementById('createTestForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const testData = {
-                name: document.getElementById('testName').value,
-                standard: document.getElementById('standard').value,
-                subject: document.getElementById('subject').value,
-                question_paper: document.getElementById('questionPaper').files[0],
-                answer_key: document.getElementById('answerKey').files[0]
-            };
+            const formData = new FormData();
+            formData.append('name', document.getElementById('testName').value);
+            formData.append('standard', document.getElementById('standard').value);
+            formData.append('section', 'A'); // Default section
+            formData.append('subject', document.getElementById('subject').value);
+            formData.append('question_paper', document.getElementById('questionPaper').files[0]);
+            formData.append('answer_key', document.getElementById('answerKey').files[0]);
             
             try {
-                // Simulate test creation
-                const testId = Date.now();
-                const tests = JSON.parse(localStorage.getItem('evalmate_tests') || '[]');
+                // Get authorization token
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    alert('Please login first');
+                    return;
+                }
                 
-                // Calculate total marks and question count (simulated)
-                const totalMarks = Math.floor(Math.random() * 50) + 50; // 50-100 marks
-                const questionCount = Math.floor(Math.random() * 15) + 10; // 10-25 questions
+                // Show progress
+                const progressDiv = document.createElement('div');
+                progressDiv.innerHTML = `
+                    <div class="notification">
+                        <h4>📄 Creating Test...</h4>
+                        <p>🔍 Analyzing question paper and detecting questions...</p>
+                        <div style="width: 100%; background: #e9ecef; border-radius: 10px; margin: 5px 0;">
+                            <div style="width: 50%; height: 8px; background: linear-gradient(45deg, #1976d2, #42a5f5); border-radius: 10px; animation: pulse 1s infinite;"></div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(progressDiv);
                 
-                tests.push({
-                    id: testId,
-                    name: testData.name,
-                    standard: testData.standard,
-                    subject: testData.subject,
-                    total_marks: totalMarks,
-                    question_count: questionCount,
-                    question_paper: testData.question_paper.name,
-                    answer_key: testData.answer_key.name,
-                    created_at: new Date().toISOString()
+                // Create test using real API
+                const response = await fetch(`${API_BASE}/api/tests/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
                 });
-                localStorage.setItem('evalmate_tests', JSON.stringify(tests));
                 
-                // Show success notification
-                alert('✅ Test created successfully!\n\n' +
-                      `Test Name: ${testData.name}\n` +
-                      `Subject: ${testData.subject}\n` +
-                      `Standard: ${testData.standard}\n` +
-                      `Total Marks: ${totalMarks}\n` +
-                      `Questions: ${questionCount}`);
+                const result = await response.json();
+                document.body.removeChild(progressDiv);
                 
-                // Navigate to available tests to see the newly created test
-                navigateTo('availableTestsPage');
-                loadAvailableTests();
+                if (response.ok) {
+                    const questionsDetected = result.question_analysis ? result.question_analysis.total_questions_detected : 'Analysis pending';
+                    const confidence = result.question_analysis ? (result.question_analysis.confidence_score * 100).toFixed(1) + '%' : 'N/A';
+                    
+                    alert(`✅ Test created successfully!\n\n` +
+                          `Test Name: ${result.name}\n` +
+                          `Subject: ${result.subject}\n` +
+                          `Standard: ${result.standard}\n` +
+                          `Questions Detected: ${questionsDetected}\n` +
+                          `Detection Confidence: ${confidence}`);
+                    
+                    // Navigate to available tests
+                    navigateTo('availableTestsPage');
+                    loadAvailableTests();
+                } else {
+                    throw new Error(result.detail || 'Failed to create test');
+                }
                 
             } catch (error) {
                 alert('❌ Error creating test: ' + error.message);
@@ -833,76 +1107,310 @@
         });
 
         // Load available tests (includes both sample and user-created tests)
-        function loadAvailableTests() {
-            // Sample test data
-            const sampleTests = [
-                {
-                    id: 1001,
-                    name: "Mathematics Mid-term Exam 2025",
-                    standard: "10th",
-                    subject: "Mathematics",
-                    total_marks: 100,
-                    question_count: 20,
-                    created_at: "2025-10-25T10:00:00Z"
-                },
-                {
-                    id: 1002,
-                    name: "Physics Final Exam 2025",
-                    standard: "11th", 
-                    subject: "Physics",
-                    total_marks: 80,
-                    question_count: 15,
-                    created_at: "2025-10-24T14:30:00Z"
-                },
-                {
-                    id: 1003,
-                    name: "Chemistry Chapter Test",
-                    standard: "12th",
-                    subject: "Chemistry", 
-                    total_marks: 50,
-                    question_count: 10,
-                    created_at: "2025-10-23T09:15:00Z"
-                },
-                {
-                    id: 1004,
-                    name: "Biology Assessment Test",
-                    standard: "11th",
-                    subject: "Biology",
-                    total_marks: 75,
-                    question_count: 18,
-                    created_at: "2025-10-22T11:45:00Z"
-                }
-            ];
-            
-            // Get user-created tests from localStorage
-            const userTests = JSON.parse(localStorage.getItem('evalmate_tests') || '[]');
-            
-            // Combine sample and user tests
-            const allTests = [...sampleTests, ...userTests];
-            
+        async function loadAvailableTests() {
             const container = document.getElementById('testsList');
             
-            if (allTests.length === 0) {
+            try {
+                // Get authorization token
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    container.innerHTML = '<p>Please login to view tests</p>';
+                    return;
+                }
+                
+                // Show loading
+                container.innerHTML = '<p>Loading tests...</p>';
+                
+                // Fetch tests from API
+                const response = await fetch(`${API_BASE}/api/tests/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch tests');
+                }
+                
+                const tests = await response.json();
+                
+                if (tests.length === 0) {
+                    container.innerHTML = `
+                        <div class="notification">
+                            <h4>📋 No Tests Available</h4>
+                            <p>Create a new test to get started with AI-powered evaluation.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Display tests
+                container.innerHTML = tests.map(test => {
+                    const createdDate = new Date(test.created_at).toLocaleDateString();
+                    const questionsInfo = test.metadata ? 
+                        JSON.parse(test.metadata).total_questions_detected || 'Unknown' : 'Unknown';
+                    
+                    return `
+                        <div class="test-card" onclick="selectTestForSections(${test.id}, '${test.name}', '${test.standard}')">
+                            <div class="test-header">
+                                <h3>${test.name}</h3>
+                                <div class="test-meta">
+                                    <span class="badge">${test.standard} - ${test.subject}</span>
+                                    <span class="date">${createdDate}</span>
+                                </div>
+                            </div>
+                            <div class="test-details">
+                                <div class="detail-item">
+                                    <strong>Questions Detected:</strong> ${questionsInfo}
+                                </div>
+                                <div class="detail-item">
+                                    <strong>Section:</strong> ${test.section}
+                                </div>
+                                <div class="detail-item">
+                                    <strong>Status:</strong> <span class="status-active">Active</span>
+                                </div>
+                            </div>
+                            <div class="test-actions" onclick="event.stopPropagation()">
+                                <button class="btn btn-small" onclick="selectTestForSections(${test.id}, '${test.name}', '${test.standard}')">
+                                    � Select Students
+                                </button>
+                                <button class="btn btn-small btn-secondary" onclick="viewTestDetails(${test.id})">
+                                    👁️ View Details
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
                 container.innerHTML = `
-                    <div class="notification">
-                        <p>📝 No tests available. <a href="#" onclick="showHostTest()">Create your first test</a></p>
+                    <div class="notification error">
+                        <h4>❌ Error Loading Tests</h4>
+                        <p>${error.message}</p>
                     </div>
                 `;
+            }
+        }
+
+        function selectTestForEvaluation(testId, testName) {
+            currentTest = { 
+                id: testId, 
+                name: testName
+            };
+            document.getElementById('selectedTestName').textContent = testName;
+            navigateTo('evaluationPage');
+        }
+
+        function viewTestDetails(testId) {
+            alert(`Viewing details for test ID: ${testId}`);
+        }
+        
+        // New hierarchical navigation functions
+        function selectTestForSections(testId, testName, standard) {
+            currentTest = { 
+                id: testId, 
+                name: testName,
+                standard: standard
+            };
+            document.getElementById('sectionTitle').textContent = `${testName} - Select Section`;
+            navigateTo('sectionSelectionPage');
+        }
+        
+        function selectSection(section) {
+            if (!currentTest) {
+                alert('Please select a test first');
                 return;
             }
             
-            container.innerHTML = allTests.map(test => `
-                <div class="test-banner" onclick="selectTest(${test.id}, '${test.name}', '${test.standard}', '${test.subject}', ${test.total_marks})">
-                    <h3>${test.name} ${test.id >= 1000 ? '<span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 10px;">Sample</span>' : '<span style="background: #e8f5e8; color: #2e7d2e; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 10px;">Created</span>'}</h3>
-                    <div class="test-info">
-                        <span><strong>Standard:</strong> ${test.standard}</span>
-                        <span><strong>Subject:</strong> ${test.subject}</span>
-                        <span><strong>Total Marks:</strong> ${test.total_marks}</span>
-                        <span><strong>Questions:</strong> ${test.question_count}</span>
-                        <span><strong>Created:</strong> ${new Date(test.created_at).toLocaleDateString()}</span>
+            console.log('Selecting section:', section, 'for test:', currentTest);
+            
+            currentTest.section = section;
+            document.getElementById('studentTitle').textContent = `${currentTest.name} - ${currentTest.standard} ${section}`;
+            
+            console.log('About to load students for:', currentTest.standard, section);
+            loadStudentsForSection(currentTest.standard, section);
+            navigateTo('studentSelectionPage');
+        }
+        
+        async function loadStudentsForSection(standard, section) {
+            const container = document.getElementById('studentsList');
+            console.log('Loading students for:', standard, section);
+            
+            try {
+                const token = localStorage.getItem('access_token');
+                console.log('Token exists:', !!token);
+                
+                container.innerHTML = '<p>Loading students...</p>';
+                
+                const url = `${API_BASE}/api/students/?standard=${standard}&section=${section}`;
+                console.log('Fetching from URL:', url);
+                
+                const response = await fetch(url, {
+                    headers: token ? {
+                        'Authorization': `Bearer ${token}`
+                    } : {}
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response error:', errorText);
+                    throw new Error(`Failed to fetch students: ${response.status} ${errorText}`);
+                }
+                
+                const students = await response.json();
+                console.log('Students received:', students.length, students);
+                
+                if (students.length === 0) {
+                    container.innerHTML = '<p>No students found for this section</p>';
+                    return;
+                }
+                
+                const studentsHtml = students.map(student => `
+                    <div class="student-card" onclick="selectStudentForUpload(${student.id}, '${student.first_name} ${student.last_name}', ${student.roll_number})">
+                        <div class="student-info-left">
+                            <div class="student-avatar">${student.roll_number}</div>
+                            <div class="student-details">
+                                <h4>${student.first_name} ${student.last_name}</h4>
+                                <p>Roll No: ${student.roll_number} | ${student.email}</p>
+                            </div>
+                        </div>
+                        <div class="student-status status-pending">
+                            Pending Evaluation
+                        </div>
+                    </div>
+                `).join('');
+                
+                console.log('Setting students HTML:', studentsHtml.substring(0, 200) + '...');
+                container.innerHTML = studentsHtml;
+                
+            } catch (error) {
+                console.error('Error loading students:', error);
+                container.innerHTML = `
+                    <div class="notification error">
+                        <h4>❌ Error Loading Students</h4>
+                        <p>${error.message}</p>
+                        <button onclick="loadStudentsForSection('${standard}', '${section}')" class="btn secondary">Retry</button>
+                    </div>
+                `;
+            }
+        }
+        
+        function selectStudentForUpload(studentId, studentName, rollNumber) {
+            if (!currentTest) {
+                alert('Please select a test first');
+                return;
+            }
+            
+            currentTest.studentId = studentId;
+            currentTest.studentName = studentName;
+            currentTest.rollNumber = rollNumber;
+            
+            document.getElementById('uploadTitle').textContent = `Upload Answer Sheet - ${studentName}`;
+            document.getElementById('selectedStudentInfo').innerHTML = `
+                <div class="selected-student-info">
+                    <div class="student-avatar">${rollNumber}</div>
+                    <div>
+                        <h4>${studentName}</h4>
+                        <p>Roll No: ${rollNumber} | ${currentTest.standard} ${currentTest.section}</p>
+                        <p>Test: ${currentTest.name}</p>
                     </div>
                 </div>
-            `).join('');
+            `;
+            
+            navigateTo('answerSheetUploadPage');
+        }
+        
+        async function uploadAndEvaluateAnswerSheet() {
+            const fileInput = document.getElementById('answerSheetFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select an answer sheet file to upload');
+                return;
+            }
+            
+            if (!currentTest || !currentTest.studentId) {
+                alert('Student information is missing. Please go back and select a student.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('answer_sheet', file);
+            formData.append('test_id', currentTest.id);
+            formData.append('student_id', currentTest.studentId);
+            
+            const uploadBtn = document.querySelector('.upload-button');
+            const originalText = uploadBtn.textContent;
+            uploadBtn.textContent = 'Processing... This may take a few minutes';
+            uploadBtn.disabled = true;
+            
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`${API_BASE}/api/evaluations/evaluate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to upload and evaluate answer sheet');
+                }
+                
+                const result = await response.json();
+                
+                // Show success message
+                document.getElementById('uploadEvaluationResult').innerHTML = `
+                    <div class="notification success">
+                        <h4>✅ Evaluation Completed!</h4>
+                        <p>Answer sheet uploaded and evaluated successfully for <strong>${currentTest.studentName}</strong></p>
+                        <div class="evaluation-summary">
+                            <h5>Quick Results:</h5>
+                            <ul>
+                                <li>Score: ${result.total_score || 'Processing'}</li>
+                                <li>Questions Detected: ${result.questions_evaluated || 'Processing'}</li>
+                                <li>Evaluation ID: ${result.evaluation_id}</li>
+                            </ul>
+                        </div>
+                        <div class="action-buttons">
+                            <button onclick="goBackToStudents()" class="btn secondary">Evaluate Another Student</button>
+                            <button onclick="viewDetailedResults(${result.evaluation_id})" class="btn primary">View Detailed Results</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Reset file input
+                fileInput.value = '';
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                document.getElementById('uploadEvaluationResult').innerHTML = `
+                    <div class="notification error">
+                        <h4>❌ Upload Failed</h4>
+                        <p>${error.message}</p>
+                        <button onclick="document.getElementById('uploadEvaluationResult').innerHTML = ''" class="btn secondary">Try Again</button>
+                    </div>
+                `;
+            } finally {
+                uploadBtn.textContent = originalText;
+                uploadBtn.disabled = false;
+            }
+        }
+        
+        function goBackToStudents() {
+            document.getElementById('uploadEvaluationResult').innerHTML = '';
+            loadStudentsForSection(currentTest.standard, currentTest.section);
+            navigateTo('studentSelectionPage');
+        }
+        
+        function viewDetailedResults(evaluationId) {
+            // Navigate to detailed results view
+            alert(`Viewing detailed results for evaluation ID: ${evaluationId}`);
+            // Future implementation: Navigate to detailed results page
         }
 
         function selectTest(testId, testName, standard, subject, totalMarks) {

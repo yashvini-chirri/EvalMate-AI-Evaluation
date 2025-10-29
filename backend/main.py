@@ -45,6 +45,23 @@ app.include_router(examiners.router, prefix="/api/examiners", tags=["Examiners"]
 app.include_router(evaluations.router, prefix="/api/evaluations", tags=["Evaluations"])
 app.include_router(ai_semantic_router, prefix="/api/advanced", tags=["AI-Powered Evaluation"])
 
+# Add static file serving for the webapp
+@app.get("/webapp-simple.html")
+async def get_simple_webapp():
+    """Serve the simple webapp HTML page"""
+    webapp_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "webapp-simple.html")
+    if os.path.exists(webapp_path):
+        return FileResponse(webapp_path)
+    raise HTTPException(status_code=404, detail="Simple webapp not found")
+
+@app.get("/webapp.html")
+async def get_webapp():
+    """Serve the main webapp HTML page"""
+    webapp_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "webapp.html")
+    if os.path.exists(webapp_path):
+        return FileResponse(webapp_path)
+    raise HTTPException(status_code=404, detail="Webapp not found")
+
 # Add demo page route
 @app.get("/demo.html")
 async def get_demo():

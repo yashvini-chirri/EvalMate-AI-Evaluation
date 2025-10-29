@@ -5,8 +5,10 @@ from app.db.database import get_db
 from app.db.models import Test, Examiner
 from app.core.security import get_current_user
 from app.schemas.test import TestCreate, TestResponse, TestUpdate
+from app.services.question_detection_service import question_detection_service
 import aiofiles
 import os
+import json
 from datetime import datetime
 
 router = APIRouter()
@@ -23,7 +25,7 @@ async def create_test(
     current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Create a new test with file uploads"""
+    """Create a new test with file uploads and automatic question detection"""
     
     # Verify user is an examiner
     if current_user["user_type"] != "examiner":
@@ -35,6 +37,7 @@ async def create_test(
     
     # Save uploaded files
     file_paths = {}
+    question_analysis = None
     
     async def save_file(file: UploadFile, file_type: str) -> str:
         if file:
@@ -53,7 +56,28 @@ async def create_test(
     file_paths["answer_key_path"] = await save_file(answer_key, "answer_key")
     file_paths["reference_book_path"] = await save_file(reference_book, "reference_book")
     
-    # Create test record
+    # Analyze question paper to detect questions and structure
+    if question_paper:
+        try:
+            # Read the PDF content for analysis
+            question_paper_content = await question_paper.read()
+            # Reset file pointer for saving
+            await question_paper.seek(0)
+            
+            # Analyze question paper
+            question_analysis = question_detection_service.analyze_question_paper(question_paper_content)
+            
+            print(f"✅ Question analysis completed: {question_analysis.get('total_questions_detected', 0)} questions detected")
+            
+        except Exception as e:
+            print(f"⚠️ Question analysis failed: {e}")
+            question_analysis = {
+                "total_questions_detected": 0,
+                "error": str(e),
+                "analysis_method": "failed"
+            }
+    
+    # Create test record with question analysis
     test = Test(
         name=name,
         subject=subject,
@@ -62,12 +86,21 @@ async def create_test(
         examiner_id=current_user["user_id"],
         question_paper_path=file_paths["question_paper_path"],
         answer_key_path=file_paths["answer_key_path"],
-        reference_book_path=file_paths["reference_book_path"]
+        reference_book_path=file_paths["reference_book_path"],
+        # Store question analysis as JSON in metadata field
+        metadata=json.dumps(question_analysis) if question_analysis else None
     )
     
     db.add(test)
     db.commit()
     db.refresh(test)
+    
+    # Add question analysis info to response
+    test_dict = test.__dict__.copy()
+    if question_analysis:
+        test_dict["question_analysis"] = question_analysis
+        test_dict["detected_questions"] = question_analysis.get("total_questions_detected", 0)
+        test_dict["confidence_score"] = question_analysis.get("confidence_score", 0.0)
     
     return test
 

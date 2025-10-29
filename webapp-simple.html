@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvalMate - Answer Sheet Evaluation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .student-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .student-item {
+            padding: 10px;
+            border: 1px solid #eee;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .student-item:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Page -->
+        <div class="page active" id="loginPage">
+            <div class="card">
+                <div class="header">
+                    <h1>🎓 EvalMate</h1>
+                    <p>AI-Powered Answer Sheet Evaluation System</p>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-full">Login</button>
+                </form>
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <p><strong>Admin Credentials:</strong></p>
+                    <p style="cursor: pointer; color: #667eea;" onclick="fillCredentials('admin', 'admin123')">
+                        admin / admin123
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="page" id="dashboard">
+            <div class="card">
+                <div class="header">
+                    <h1>Dashboard</h1>
+                    <p>Welcome to EvalMate Admin Panel</p>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card" onclick="showPage('createTest')">
+                        <h3>📝 Create Test</h3>
+                        <p>Upload question paper and answer key</p>
+                    </div>
+                    
+                    <div class="dashboard-card" onclick="showPage('evaluateAnswers')">
+                        <h3>🔍 Evaluate Answers</h3>
+                        <p>Select test and student for evaluation</p>
+                    </div>
+                    
+                    <div class="dashboard-card" onclick="showPage('viewResults')">
+                        <h3>📊 View Results</h3>
+                        <p>Check evaluation results and analytics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Test -->
+        <div class="page" id="createTest">
+            <div class="card">
+                <div class="header">
+                    <h1>Create New Test</h1>
+                </div>
+                
+                <form id="createTestForm">
+                    <div class="form-group">
+                        <label for="testName">Test Name:</label>
+                        <input type="text" id="testName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="standard">Standard:</label>
+                        <select id="standard" required>
+                            <option value="">Select Standard</option>
+                            <option value="10th">10th Grade</option>
+                            <option value="11th">11th Grade</option>
+                            <option value="12th">12th Grade</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <input type="text" id="subject" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="questionPaper">Question Paper (PDF):</label>
+                        <input type="file" id="questionPaper" accept=".pdf" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="answerKey">Answer Key (PDF):</label>
+                        <input type="file" id="answerKey" accept=".pdf" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-full">Create Test</button>
+                </form>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="showPage('dashboard')">← Back to Dashboard</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluate Answers -->
+        <div class="page" id="evaluateAnswers">
+            <div class="card">
+                <div class="header">
+                    <h1>Evaluate Answer Sheets</h1>
+                </div>
+                
+                <div id="testSelection">
+                    <h3>Available Tests</h3>
+                    <div id="testsList">Loading tests...</div>
+                </div>
+                
+                <div id="studentSelection" style="display:none;">
+                    <h3>Select Student</h3>
+                    <div id="studentsList"></div>
+                </div>
+                
+                <div id="uploadSection" style="display:none;">
+                    <h3>Upload Answer Sheet</h3>
+                    <div class="form-group">
+                        <label for="answerSheet">Answer Sheet (PDF):</label>
+                        <input type="file" id="answerSheet" accept=".pdf" required>
+                    </div>
+                    <button class="btn btn-full" onclick="evaluateAnswerSheet()">🤖 Evaluate Answer Sheet</button>
+                    <div id="evaluationResults"></div>
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="showPage('dashboard')">← Back to Dashboard</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View Results -->
+        <div class="page" id="viewResults">
+            <div class="card">
+                <div class="header">
+                    <h1>Evaluation Results</h1>
+                </div>
+                
+                <div id="resultsList">Loading results...</div>
+                
+                <div class="navigation">
+                    <button class="btn btn-secondary" onclick="showPage('dashboard')">← Back to Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let currentUser = null;
+        let selectedTest = null;
+        let selectedStudent = null;
+
+        // Page navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            if (pageId === 'evaluateAnswers') {
+                loadTests();
+            } else if (pageId === 'viewResults') {
+                loadResults();
+            }
+        }
+
+        // Fill login credentials
+        function fillCredentials(username, password) {
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+        }
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/login/examiner`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+                
+                const data = await response.json();
+                localStorage.setItem('access_token', data.access_token);
+                currentUser = { username, userType: data.user_type };
+                
+                showPage('dashboard');
+                
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            }
+        });
+
+        // Create test
+        document.getElementById('createTestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('testName').value);
+            formData.append('standard', document.getElementById('standard').value);
+            formData.append('section', 'A');
+            formData.append('subject', document.getElementById('subject').value);
+            formData.append('question_paper', document.getElementById('questionPaper').files[0]);
+            formData.append('answer_key', document.getElementById('answerKey').files[0]);
+            
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`${API_BASE}/api/tests/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create test');
+                }
+                
+                alert('Test created successfully!');
+                document.getElementById('createTestForm').reset();
+                showPage('dashboard');
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+
+        // Load tests
+        async function loadTests() {
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`${API_BASE}/api/tests/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const tests = await response.json();
+                const container = document.getElementById('testsList');
+                
+                if (tests.length === 0) {
+                    container.innerHTML = '<p>No tests available. Create a test first.</p>';
+                    return;
+                }
+                
+                container.innerHTML = tests.map(test => `
+                    <div class="student-item" onclick="selectTest(${test.id}, '${test.name}', '${test.standard}')">
+                        <strong>${test.name}</strong><br>
+                        <small>Standard: ${test.standard} | Subject: ${test.subject}</small>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                document.getElementById('testsList').innerHTML = '<p>Error loading tests</p>';
+            }
+        }
+
+        // Select test
+        function selectTest(testId, testName, standard) {
+            selectedTest = { id: testId, name: testName, standard: standard };
+            document.getElementById('testSelection').style.display = 'none';
+            document.getElementById('studentSelection').style.display = 'block';
+            loadStudents(standard);
+        }
+
+        // Load students
+        async function loadStudents(standard) {
+            try {
+                const response = await fetch(`${API_BASE}/api/students/?standard=${standard}&section=A`);
+                const students = await response.json();
+                const container = document.getElementById('studentsList');
+                
+                container.innerHTML = students.map(student => `
+                    <div class="student-item" onclick="selectStudent(${student.id}, '${student.first_name} ${student.last_name}')">
+                        <strong>${student.first_name} ${student.last_name}</strong><br>
+                        <small>Roll: ${student.roll_number} | ${student.email}</small>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                document.getElementById('studentsList').innerHTML = '<p>Error loading students</p>';
+            }
+        }
+
+        // Select student
+        function selectStudent(studentId, studentName) {
+            selectedStudent = { id: studentId, name: studentName };
+            document.getElementById('studentSelection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+        }
+
+        // Evaluate answer sheet
+        async function evaluateAnswerSheet() {
+            const fileInput = document.getElementById('answerSheet');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select an answer sheet file');
+                return;
+            }
+            
+            if (!selectedTest || !selectedStudent) {
+                alert('Please select test and student first');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('test_id', selectedTest.id);
+            formData.append('student_id', selectedStudent.id);
+            formData.append('answer_sheet', file);
+            
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await fetch(`${API_BASE}/api/evaluations/evaluate`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Evaluation failed');
+                }
+                
+                const result = await response.json();
+                
+                document.getElementById('evaluationResults').innerHTML = `
+                    <div class="result-card success">
+                        <h4>✅ Evaluation Completed!</h4>
+                        <p><strong>Student:</strong> ${selectedStudent.name}</p>
+                        <p><strong>Test:</strong> ${selectedTest.name}</p>
+                        <p><strong>Score:</strong> ${result.total_score}</p>
+                        <p><strong>Percentage:</strong> ${result.percentage}</p>
+                        <p><strong>Grade:</strong> ${result.grade}</p>
+                        <p><strong>Status:</strong> ${result.status}</p>
+                    </div>
+                `;
+                
+                // Reset for next evaluation
+                fileInput.value = '';
+                
+            } catch (error) {
+                document.getElementById('evaluationResults').innerHTML = `
+                    <div class="result-card error">
+                        <h4>❌ Evaluation Failed</h4>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Load results
+        async function loadResults() {
+            document.getElementById('resultsList').innerHTML = '<p>Results functionality will be implemented soon...</p>';
+        }
+
+        // Check if user is logged in on page load
+        window.addEventListener('load', function() {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                // Auto-login if token exists
+                showPage('dashboard');
+            }
+        });
+    </script>
+</body>
+</html>

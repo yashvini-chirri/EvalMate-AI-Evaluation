@@ -269,6 +269,36 @@
                 
                 <div id="pdfResults" class="results" style="display: none;"></div>
             </div>
+            
+            <!-- Tesseract OCR Demo -->
+            <div class="demo-section" style="border: 2px solid #28a745;">
+                <h3>🔥 FREE Tesseract OCR + Parser Evaluation</h3>
+                <p><strong>🆓 Zero Cost Solution:</strong> Uses Tesseract OCR and custom intelligent parser - No API fees, completely free!</p>
+                
+                <div class="alert" style="background: #d4edda; color: #155724; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+                    <strong>✨ Benefits:</strong> No OpenAI API costs • Works offline • Privacy-friendly • Fast processing • Custom evaluation logic
+                </div>
+                
+                <div class="form-group">
+                    <label for="tesseractPdfFile">Upload PDF Answer Sheet:</label>
+                    <input type="file" id="tesseractPdfFile" accept=".pdf" style="padding: 8px;">
+                </div>
+                
+                <div class="form-group">
+                    <label for="tesseractAnswerKey">Answer Key (JSON format):</label>
+                    <textarea id="tesseractAnswerKey" placeholder='{"1": "Expected answer 1", "2": "Expected answer 2"}'>{"1": "Photosynthesis is the process by which plants make food using sunlight, water, and carbon dioxide", "2": "The main parts of a plant are roots, stem, leaves, and flowers", "3": "Water cycle includes evaporation, condensation, precipitation, and collection"}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tesseractQuestionMarks">Question Marks (JSON format):</label>
+                    <textarea id="tesseractQuestionMarks" placeholder='{"1": 5, "2": 3}'>{"1": 5, "2": 3, "3": 4}</textarea>
+                </div>
+                
+                <button class="btn" onclick="evaluateWithTesseract()" style="background: #28a745;">🔥 FREE Tesseract Evaluation</button>
+                <button class="btn" onclick="runTesseractDemo()" style="background: #17a2b8;">🎯 Demo Without Upload</button>
+                
+                <div id="tesseractResults" class="results" style="display: none;"></div>
+            </div>
             <div class="demo-section">
                 <h3>📋 Multiple Questions Evaluation</h3>
                 <p>Evaluate multiple questions at once including skipped questions:</p>
@@ -695,6 +725,228 @@
         function loadSamplePDFData() {
             document.getElementById('pdfAnswerKey').value = '{"1": "Photosynthesis is the biological process where plants convert light energy into chemical energy using chlorophyll", "2": "Democracy is a system of government where citizens exercise power through voting and elections"}';
             document.getElementById('pdfQuestionMarks').value = '{"1": "5", "2": "4"}';
+        }
+        
+        // Tesseract OCR Evaluation Functions
+        async function evaluateWithTesseract() {
+            const pdfFile = document.getElementById('tesseractPdfFile').files[0];
+            const answerKey = document.getElementById('tesseractAnswerKey').value;
+            const questionMarks = document.getElementById('tesseractQuestionMarks').value;
+            
+            if (!pdfFile) {
+                alert('Please select a PDF file for Tesseract OCR evaluation');
+                return;
+            }
+            
+            if (!answerKey || !questionMarks) {
+                alert('Please provide answer key and question marks');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('tesseractResults');
+            resultsDiv.style.display = 'block';
+            
+            // Show Tesseract workflow stages
+            const startTime = Date.now();
+            let currentStage = 1;
+            const stages = [
+                '🔍 Tesseract OCR Text Extraction',
+                '🧩 Custom Parser Processing',
+                '🎯 Intelligent Evaluation'
+            ];
+            
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <h4>🔥 FREE Tesseract OCR Workflow</h4>
+                    <p><strong>Stage ${currentStage}/3:</strong> ${stages[0]}</p>
+                    <p style="font-size: 0.9em; color: #666;">Extracting text using Tesseract OCR...</p>
+                    <p style="font-size: 0.8em; margin-top: 5px;">⏱️ Started: ${new Date().toLocaleTimeString()}</p>
+                    <p style="font-size: 0.8em; color: #28a745;">💰 No API costs - completely free!</p>
+                </div>
+            `;
+            
+            // Update Tesseract workflow stages during processing
+            const stageInterval = setInterval(() => {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                const stageIndex = Math.min(Math.floor(elapsed / 3), stages.length - 1);
+                
+                if (stageIndex !== currentStage - 1) {
+                    currentStage = stageIndex + 1;
+                }
+                
+                const currentStatus = resultsDiv.querySelector('.loading');
+                if (currentStatus) {
+                    currentStatus.innerHTML = `
+                        <div class="spinner"></div>
+                        <h4>🔥 FREE Tesseract OCR Workflow</h4>
+                        <p><strong>Stage ${currentStage}/3:</strong> ${stages[stageIndex]}</p>
+                        <p style="font-size: 0.9em; color: #666;">
+                            ${stageIndex === 0 ? 'Extracting text using Tesseract OCR...' :
+                              stageIndex === 1 ? 'Parsing answers with custom intelligent parser...' :
+                              'Evaluating with multi-criteria analysis...'}
+                        </p>
+                        <p style="font-size: 0.8em; margin-top: 5px;">⏱️ Processing time: ${elapsed}s</p>
+                        <p style="font-size: 0.8em; color: #28a745;">💰 No API costs - completely free!</p>
+                        <div style="margin-top: 10px; font-size: 0.8em;">
+                            ${stages.map((stage, idx) => 
+                                `<span style="color: ${idx < currentStage ? '#28a745' : idx === currentStage - 1 ? '#007bff' : '#6c757d'}">
+                                    ${idx < currentStage ? '✅' : idx === currentStage - 1 ? '🔄' : '⏳'} ${stage}
+                                </span>`
+                            ).join('<br>')}
+                        </div>
+                    `;
+                }
+            }, 2000);
+            
+            try {
+                const formData = new FormData();
+                formData.append('answer_key', answerKey);
+                formData.append('question_marks', questionMarks);
+                formData.append('answer_sheet', pdfFile);
+                
+                const response = await fetch('/api/tesseract/evaluate-tesseract', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                clearInterval(stageInterval);
+                const endTime = Date.now();
+                const totalTime = ((endTime - startTime) / 1000).toFixed(2);
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayTesseractResults(result.data, totalTime);
+                } else {
+                    resultsDiv.innerHTML = `<p style="color: red;">❌ Error: ${result.message || 'Evaluation failed'}</p>`;
+                }
+                
+            } catch (error) {
+                clearInterval(stageInterval);
+                resultsDiv.innerHTML = `<p style="color: red;">❌ Tesseract evaluation error: ${error.message}</p>`;
+            }
+        }
+        
+        async function runTesseractDemo() {
+            const resultsDiv = document.getElementById('tesseractResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><h4>🎯 Running Tesseract Demo...</h4><p>Demonstrating free OCR + parser evaluation...</p></div>';
+            
+            try {
+                const response = await fetch('/api/tesseract/demo-tesseract', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayTesseractResults(result.data, '0.85');
+                } else {
+                    resultsDiv.innerHTML = `<p style="color: red;">❌ Demo failed: ${result.message}</p>`;
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">❌ Demo error: ${error.message}</p>`;
+            }
+        }
+        
+        function displayTesseractResults(result, totalTime) {
+            const resultsDiv = document.getElementById('tesseractResults');
+            
+            let html = `
+                <h4>🔥 FREE Tesseract OCR Results</h4>
+                
+                <div style="margin-bottom: 20px; padding: 15px; background: #d4edda; border-radius: 8px; border: 2px solid #28a745;">
+                    <h5>🆓 Zero Cost Evaluation Summary</h5>
+                    <p><strong>Evaluation Method:</strong> ${result.processing_info?.workflow_type || 'Tesseract OCR + Custom Parser'}</p>
+                    <p><strong>OCR Engine:</strong> ${result.processing_info?.ocr_engine || 'Tesseract'}</p>
+                    <p><strong>Processing Time:</strong> ${result.processing_info?.processing_time_seconds || totalTime}s</p>
+                    <p><strong>Cost:</strong> <span style="color: #28a745; font-weight: bold;">FREE - No API costs!</span></p>
+                    <p><strong>Privacy:</strong> All processing done locally - no data sent to external APIs</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div class="metric-card">
+                        <h4>${result.obtained_marks}/${result.total_marks}</h4>
+                        <p>Total Score</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4>${result.percentage}%</h4>
+                        <p>Percentage</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4>${result.grade}</h4>
+                        <p>Grade</p>
+                    </div>
+                    <div class="metric-card" style="background: #d4edda;">
+                        <h4>FREE</h4>
+                        <p>API Cost</p>
+                    </div>
+                </div>
+            `;
+            
+            if (result.detailed_results && result.detailed_results.length > 0) {
+                html += '<h5>📊 Question-wise Analysis</h5>';
+                
+                result.detailed_results.forEach((evaluation, index) => {
+                    const percentage = ((evaluation.marks_obtained / evaluation.marks_allocated) * 100).toFixed(1);
+                    const statusIcon = evaluation.status === 'skipped' ? '⚠️' : 
+                                     percentage >= 80 ? '🟢' : 
+                                     percentage >= 60 ? '🟡' : '🔴';
+                    
+                    html += `
+                        <div style="border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #f9f9f9;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h6>${statusIcon} Question ${evaluation.question_id}</h6>
+                                <strong>${evaluation.marks_obtained}/${evaluation.marks_allocated} (${percentage}%)</strong>
+                            </div>
+                            
+                            ${evaluation.status === 'skipped' ? 
+                                `<p style="color: #856404; background: #fff3cd; padding: 8px; border-radius: 4px;">
+                                    ⚠️ Question not attempted - detected by Tesseract parser
+                                </p>` :
+                                `
+                                <p><strong>Student Answer:</strong> "${evaluation.student_answer}"</p>
+                                <p><strong>Expected Answer:</strong> "${evaluation.model_answer}"</p>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+                                    <div>
+                                        <p><strong>Conceptual Understanding:</strong> ${((evaluation.conceptual_understanding || 0) * 100).toFixed(1)}%</p>
+                                        <p><strong>Factual Accuracy:</strong> ${((evaluation.factual_accuracy || 0) * 100).toFixed(1)}%</p>
+                                    </div>
+                                    <div>
+                                        <p><strong>Completeness:</strong> ${((evaluation.completeness || 0) * 100).toFixed(1)}%</p>
+                                        <p><strong>Clarity:</strong> ${((evaluation.clarity_expression || 0) * 100).toFixed(1)}%</p>
+                                    </div>
+                                </div>
+                                <div style="background: #f1f3f4; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                                    <strong>🎯 Evaluation Feedback:</strong> ${evaluation.feedback}
+                                </div>
+                                ${evaluation.strengths && evaluation.strengths.length > 0 ? 
+                                    `<p><strong>✅ Strengths:</strong> ${evaluation.strengths.join(', ')}</p>` : ''}
+                                ${evaluation.weaknesses && evaluation.weaknesses.length > 0 ? 
+                                    `<p><strong>⚠️ Improvements:</strong> ${evaluation.weaknesses.join(', ')}</p>` : ''}
+                                <p style="font-size: 0.8em; color: #28a745;">🔥 Evaluated with Tesseract OCR + Custom Parser (FREE)</p>
+                                `
+                            }
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                <div style="margin-top: 20px; padding: 15px; background: #d4edda; border-radius: 8px;">
+                    <strong>🎯 Tesseract Processing Confirmation:</strong>
+                    <br>• OCR processing completed: ✅ Tesseract extracted text successfully
+                    <br>• Custom parser analysis: ✅ Intelligent answer detection completed
+                    <br>• Multi-criteria evaluation: ✅ Completed with similarity analysis
+                    <br>• Total processing time: ${result.processing_info?.processing_time_seconds || totalTime}s
+                    <br>• <strong>Cost: FREE - No API charges!</strong>
+                    <br>• Privacy: All processing done locally
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = html;
         }
         
         function loadSampleQuestion() {

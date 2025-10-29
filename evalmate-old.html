@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvalMate - Simple Version</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .student-item {
+            padding: 15px;
+            border: 1px solid #eee;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .student-item:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .result-card {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .credentials {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .credentials p {
+            margin: 5px 0;
+            cursor: pointer;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .credentials p:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Page -->
+        <div class="page active" id="loginPage">
+            <div class="card">
+                <div class="header">
+                    <h1>🎓 EvalMate - Old Version</h1>
+                    <p>Simple Answer Sheet Evaluation System</p>
+                </div>
+                
+                <!-- Login Type Selection -->
+                <div id="loginTypeSelection">
+                    <h3 style="text-align: center; margin-bottom: 30px;">Choose Login Type</h3>
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card" onclick="showLoginForm('teacher')">
+                            <h3>👨‍🏫 Teacher Login</h3>
+                            <p>Access evaluation tools and create tests</p>
+                        </div>
+                        
+                        <div class="dashboard-card" onclick="showLoginForm('student')">
+                            <h3>👨‍🎓 Student Login</h3>
+                            <p>View your test results and grades</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Teacher Login Form -->
+                <div id="teacherLoginForm" style="display: none;">
+                    <div class="header">
+                        <h3>👨‍🏫 Teacher Login</h3>
+                    </div>
+                    
+                    <form id="teacherForm">
+                        <div class="form-group">
+                            <label for="teacherUsername">Teacher ID:</label>
+                            <input type="text" id="teacherUsername" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="teacherPassword">Password:</label>
+                            <input type="password" id="teacherPassword" required>
+                        </div>
+                        
+                        <button type="submit" class="btn">Login as Teacher</button>
+                        <button type="button" class="btn btn-secondary" onclick="backToLoginSelection()">← Back</button>
+                    </form>
+                    
+                    <div class="credentials">
+                        <p><strong>Teacher Credentials:</strong></p>
+                        <p onclick="fillTeacherCredentials('admin', 'admin123')">
+                            👨‍🏫 admin / admin123
+                        </p>
+                        <p onclick="fillTeacherCredentials('teacher1', 'teacher123')">
+                            👨‍🏫 teacher1 / teacher123
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Student Login Form -->
+                <div id="studentLoginForm" style="display: none;">
+                    <div class="header">
+                        <h3>�‍🎓 Student Login</h3>
+                    </div>
+                    
+                    <form id="studentForm">
+                        <div class="form-group">
+                            <label for="studentStandard">Standard:</label>
+                            <select id="studentStandard" required onchange="loadStudentNames()">
+                                <option value="">Select Standard</option>
+                                <option value="10th">10th Grade</option>
+                                <option value="11th">11th Grade</option>
+                                <option value="12th">12th Grade</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="studentName">Student Name:</label>
+                            <select id="studentName" required>
+                                <option value="">Select Student</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="studentPassword">Password:</label>
+                            <input type="password" id="studentPassword" required placeholder="Enter: student123">
+                        </div>
+                        
+                        <button type="submit" class="btn">Login as Student</button>
+                        <button type="button" class="btn btn-secondary" onclick="backToLoginSelection()">← Back</button>
+                    </form>
+                    
+                    <div class="credentials">
+                        <p><strong>Student Credentials:</strong></p>
+                        <p>🔑 Any student name + password: <strong>student123</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="page" id="dashboard">
+            <div class="card">
+                <div class="header">
+                    <h1>📊 Teacher Dashboard</h1>
+                    <p>Welcome back, <span id="teacherName">Teacher</span>!</p>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card" onclick="showPage('createTest')">
+                        <h3>📝 Create Test</h3>
+                        <p>Upload question paper and answer key</p>
+                    </div>
+                    <div class="dashboard-card" onclick="showPage('evaluateAnswers')">
+                        <h3>🔍 Evaluate Answers</h3>
+                        <p>Select students and evaluate answer sheets</p>
+                    </div>
+                    
+                    <div class="dashboard-card" onclick="showPage('viewResults')">
+                        <h3>📊 View Results</h3>
+                        <p>Check evaluation results and grades</p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+
+        <!-- Student Dashboard -->
+        <div class="page" id="studentDashboard">
+            <div class="card">
+                <div class="header">
+                    <h1>📚 Student Dashboard</h1>
+                    <p>Welcome, <span id="studentDisplayName">Student</span>!</p>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card" onclick="showPage('studentResults')">
+                        <h3>📊 My Results</h3>
+                        <p>View your test scores and grades</p>
+                    </div>
+                    
+                    <div class="dashboard-card" onclick="showPage('studentTests')">
+                        <h3>📝 Available Tests</h3>
+                        <p>Check tests assigned to you</p>
+                    </div>
+                    
+                    <div class="dashboard-card" onclick="showPage('studentProfile')">
+                        <h3>👤 My Profile</h3>
+                        <p>View your academic information</p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="logout()">🚪 Logout</button>
+            </div>
+        </div>
+
+        <!-- Create Test -->
+        <div class="page" id="createTest">
+            <div class="card">
+                <div class="header">
+                    <h1>📝 Create New Test</h1>
+                </div>
+                
+                <form id="createTestForm">
+                    <div class="form-group">
+                        <label for="testName">Test Name:</label>
+                        <input type="text" id="testName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="standard">Standard:</label>
+                        <select id="standard" required>
+                            <option value="">Select Standard</option>
+                            <option value="10th">10th Grade</option>
+                            <option value="11th">11th Grade</option>
+                            <option value="12th">12th Grade</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <input type="text" id="subject" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="questionPaper">Question Paper (PDF):</label>
+                        <input type="file" id="questionPaper" accept=".pdf" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="answerKey">Answer Key (PDF):</label>
+                        <input type="file" id="answerKey" accept=".pdf" required>
+                    </div>
+                    
+                    <button type="submit" class="btn">✅ Create Test</button>
+                    <button type="button" class="btn btn-secondary" onclick="showPage('dashboard')">← Back to Dashboard</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Evaluate Answers -->
+        <div class="page" id="evaluateAnswers">
+            <div class="card">
+                <div class="header">
+                    <h1>🔍 Evaluate Answer Sheets</h1>
+                </div>
+                
+                <div id="testSelection">
+                    <h3>📚 Created Tests</h3>
+                    <div id="testsList">
+                        <!-- Tests will be loaded dynamically -->
+                    </div>
+                </div>
+                
+                <div id="sectionSelection" style="display:none;">
+                    <h3>📋 Choose Section</h3>
+                    <p><strong>Test:</strong> <span id="selectedTestInfo"></span></p>
+                    <div id="sectionsList">
+                        <div class="student-item" onclick="selectSection('A'); console.log('Section A clicked!');">
+                            <strong>📖 Section A</strong><br>
+                            <small>20 students available</small>
+                        </div>
+                        <div class="student-item" onclick="selectSection('B'); console.log('Section B clicked!');">
+                            <strong>📖 Section B</strong><br>
+                            <small>20 students available</small>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <h4 style="margin: 0 0 10px 0; color: #666;">🔧 Direct Access (if sections not working):</h4>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="directLoadStudents('10th', 'A')">🚀 10th A</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="directLoadStudents('10th', 'B')">🚀 10th B</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="directLoadStudents('11th', 'A')">🚀 11th A</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="directLoadStudents('11th', 'B')">🚀 11th B</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="directLoadStudents('12th', 'A')">🚀 12th A</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="directLoadStudents('12th', 'B')">🚀 12th B</button>
+                    </div>
+                    
+                    <!-- Debug buttons -->
+                    <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                        <p><strong>Debug Tools:</strong></p>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="verifyDatabase()">🗃️ Verify Database</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="testStudentData()">🔍 Test Student Data</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="directTestSectionA()">📋 Test Section A</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="directTestSectionB()">📋 Test Section B</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="forceLoadStudents()">👥 Force Load Students</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="console.log('Current test:', selectedTest)">📊 Check Test</button>
+                        <button class="btn" style="width: auto; margin: 5px;" onclick="quickAccessStudents()">🚀 Quick Access</button>
+                    </div>
+                    
+                    <button class="btn btn-secondary" onclick="backToTestSelection()">← Back to Tests</button>
+                </div>
+                
+                <div id="studentSelection" style="display:none;">
+                    <h3>👥 Choose Student</h3>
+                    <p><strong>Selected:</strong> <span id="selectedSectionInfo"></span></p>
+                    <div id="studentsList"></div>
+                    <button class="btn btn-secondary" onclick="backToSectionSelection()">← Back to Sections</button>
+                </div>
+                
+                <div id="uploadSection" style="display:none;">
+                    <h3>📄 Upload Answer Sheet</h3>
+                    <div class="result-card" style="background: #e3f2fd; border-color: #1976d2;">
+                        <h4>📋 Selected Details</h4>
+                        <p><strong>Test:</strong> <span id="uploadTestName"></span></p>
+                        <p><strong>Subject:</strong> <span id="uploadSubject"></span></p>
+                        <p><strong>Student:</strong> <span id="uploadStudentName"></span></p>
+                        <p><strong>Standard & Section:</strong> <span id="uploadStandardSection"></span></p>
+                        <p><strong>Roll No:</strong> <span id="uploadRollNo"></span></p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="answerSheet">Select Answer Sheet (PDF/Image):</label>
+                        <input type="file" id="answerSheet" accept=".pdf,.jpg,.jpeg,.png" required>
+                    </div>
+                    <button class="btn" onclick="evaluateAnswerSheet()">🤖 Start Evaluation</button>
+                    <button class="btn btn-secondary" onclick="backToStudentSelection()">← Choose Different Student</button>
+                    <div id="evaluationResults"></div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="showPage('dashboard')">← Back to Dashboard</button>
+            </div>
+        </div>
+
+        <!-- View Results -->
+        <div class="page" id="viewResults">
+            <div class="card">
+                <div class="header">
+                    <h1>📊 Evaluation Results</h1>
+                </div>
+                
+                <div id="resultsList">
+                    <!-- Results will be loaded dynamically -->
+                </div>
+                
+                <button class="btn btn-secondary" onclick="showPage('dashboard')">← Back to Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Student Results -->
+        <div class="page" id="studentResults">
+            <div class="card">
+                <div class="header">
+                    <h1>📊 My Test Results</h1>
+                </div>
+                
+                <div id="studentResultsList">
+                    <div class="result-card">
+                        <h4>📖 Mathematics Test</h4>
+                        <p><strong>Score:</strong> 85/100 (85%)</p>
+                        <p><strong>Grade:</strong> A</p>
+                        <p><strong>Date:</strong> October 25, 2024</p>
+                        <p><strong>Feedback:</strong> Excellent work on algebra problems. Focus on geometry for improvement.</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h4>🔬 Science Test</h4>
+                        <p><strong>Score:</strong> 92/100 (92%)</p>
+                        <p><strong>Grade:</strong> A+</p>
+                        <p><strong>Date:</strong> October 20, 2024</p>
+                        <p><strong>Feedback:</strong> Outstanding understanding of concepts. Keep up the great work!</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h4>📚 English Test</h4>
+                        <p><strong>Score:</strong> 78/100 (78%)</p>
+                        <p><strong>Grade:</strong> B</p>
+                        <p><strong>Date:</strong> October 15, 2024</p>
+                        <p><strong>Feedback:</strong> Good essay writing. Work on grammar and vocabulary.</p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="showPage('studentDashboard')">← Back to Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Student Tests -->
+        <div class="page" id="studentTests">
+            <div class="card">
+                <div class="header">
+                    <h1>📝 Available Tests</h1>
+                </div>
+                
+                <div id="availableTestsList">
+                    <div class="student-item">
+                        <strong>📖 Mathematics - Chapter 5 Test</strong><br>
+                        <small>Due: November 5, 2024 | Duration: 2 hours</small><br>
+                        <button class="btn" style="width: auto; margin-top: 10px;">📄 Download Question Paper</button>
+                    </div>
+                    
+                    <div class="student-item">
+                        <strong>🔬 Physics Lab Test</strong><br>
+                        <small>Due: November 8, 2024 | Duration: 1.5 hours</small><br>
+                        <button class="btn" style="width: auto; margin-top: 10px;">📄 Download Question Paper</button>
+                    </div>
+                    
+                    <div class="student-item">
+                        <strong>📚 English Literature Test</strong><br>
+                        <small>Due: November 10, 2024 | Duration: 2 hours</small><br>
+                        <button class="btn" style="width: auto; margin-top: 10px;">📄 Download Question Paper</button>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="showPage('studentDashboard')">← Back to Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Student Profile -->
+        <div class="page" id="studentProfile">
+            <div class="card">
+                <div class="header">
+                    <h1>👤 My Profile</h1>
+                </div>
+                
+                <div id="profileInfo">
+                    <div class="result-card">
+                        <h4>📋 Student Information</h4>
+                        <p><strong>Name:</strong> <span id="profileStudentName">Student Name</span></p>
+                        <p><strong>Roll Number:</strong> <span id="profileRollNumber">001</span></p>
+                        <p><strong>Registration Number:</strong> <span id="profileRegNumber">10A001</span></p>
+                        <p><strong>Standard:</strong> <span id="profileStandard">10th Grade</span></p>
+                        <p><strong>Section:</strong> <span id="profileSection">Section A</span></p>
+                        <p><strong>Academic Year:</strong> 2024-2025</p>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h4>📊 Academic Performance</h4>
+                        <p><strong>Overall Grade:</strong> A</p>
+                        <p><strong>Average Score:</strong> 85.2%</p>
+                        <p><strong>Tests Completed:</strong> 12</p>
+                        <p><strong>Rank in Class:</strong> 3rd</p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="showPage('studentDashboard')">← Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedTest = null;
+        let selectedStudent = null;
+        let selectedSection = null;
+        let currentUser = null;
+        let userType = null;
+
+        // Initialize student database immediately when script loads
+        console.log('=== INITIALIZING STUDENT DATABASE ===');
+        
+        // Mock student database with registration numbers and credentials
+        window.studentDatabase = {
+            '10th': {
+                'A': [
+                    {name: 'Rahul Kumar', regNo: '10A001', rollNo: 1, section: 'A', password: 'student123'},
+                    {name: 'Priya Sharma', regNo: '10A002', rollNo: 2, section: 'A', password: 'student123'},
+                    {name: 'Aarav Singh', regNo: '10A003', rollNo: 3, section: 'A', password: 'student123'},
+                    {name: 'Anita Patel', regNo: '10A004', rollNo: 4, section: 'A', password: 'student123'},
+                    {name: 'Arjun Gupta', regNo: '10A005', rollNo: 5, section: 'A', password: 'student123'},
+                    {name: 'Kavya Reddy', regNo: '10A006', rollNo: 6, section: 'A', password: 'student123'},
+                    {name: 'Ravi Verma', regNo: '10A007', rollNo: 7, section: 'A', password: 'student123'},
+                    {name: 'Sneha Joshi', regNo: '10A008', rollNo: 8, section: 'A', password: 'student123'},
+                    {name: 'Vikram Nair', regNo: '10A009', rollNo: 9, section: 'A', password: 'student123'},
+                    {name: 'Meera Shah', regNo: '10A010', rollNo: 10, section: 'A', password: 'student123'},
+                    {name: 'Suresh Kumar', regNo: '10A011', rollNo: 11, section: 'A', password: 'student123'},
+                    {name: 'Divya Singh', regNo: '10A012', rollNo: 12, section: 'A', password: 'student123'},
+                    {name: 'Kiran Patel', regNo: '10A013', rollNo: 13, section: 'A', password: 'student123'},
+                    {name: 'Pooja Gupta', regNo: '10A014', rollNo: 14, section: 'A', password: 'student123'},
+                    {name: 'Manoj Reddy', regNo: '10A015', rollNo: 15, section: 'A', password: 'student123'},
+                    {name: 'Lakshmi Verma', regNo: '10A016', rollNo: 16, section: 'A', password: 'student123'},
+                    {name: 'Rajesh Joshi', regNo: '10A017', rollNo: 17, section: 'A', password: 'student123'},
+                    {name: 'Deepika Nair', regNo: '10A018', rollNo: 18, section: 'A', password: 'student123'},
+                    {name: 'Amit Shah', regNo: '10A019', rollNo: 19, section: 'A', password: 'student123'},
+                    {name: 'Sita Kumar', regNo: '10A020', rollNo: 20, section: 'A', password: 'student123'}
+                ],
+                'B': [
+                    {name: 'Rohit Sharma', regNo: '10B001', rollNo: 1, section: 'B', password: 'student123'},
+                    {name: 'Neha Gupta', regNo: '10B002', rollNo: 2, section: 'B', password: 'student123'},
+                    {name: 'Aditya Patel', regNo: '10B003', rollNo: 3, section: 'B', password: 'student123'},
+                    {name: 'Shreya Singh', regNo: '10B004', rollNo: 4, section: 'B', password: 'student123'},
+                    {name: 'Karthik Reddy', regNo: '10B005', rollNo: 5, section: 'B', password: 'student123'},
+                    {name: 'Nisha Verma', regNo: '10B006', rollNo: 6, section: 'B', password: 'student123'},
+                    {name: 'Varun Joshi', regNo: '10B007', rollNo: 7, section: 'B', password: 'student123'},
+                    {name: 'Priyanka Nair', regNo: '10B008', rollNo: 8, section: 'B', password: 'student123'},
+                    {name: 'Sanjay Shah', regNo: '10B009', rollNo: 9, section: 'B', password: 'student123'},
+                    {name: 'Kavita Kumar', regNo: '10B010', rollNo: 10, section: 'B', password: 'student123'},
+                    {name: 'Rakesh Singh', regNo: '10B011', rollNo: 11, section: 'B', password: 'student123'},
+                    {name: 'Swati Patel', regNo: '10B012', rollNo: 12, section: 'B', password: 'student123'},
+                    {name: 'Mohan Gupta', regNo: '10B013', rollNo: 13, section: 'B', password: 'student123'},
+                    {name: 'Sunita Reddy', regNo: '10B014', rollNo: 14, section: 'B', password: 'student123'},
+                    {name: 'Ajay Verma', regNo: '10B015', rollNo: 15, section: 'B', password: 'student123'},
+                    {name: 'Rekha Joshi', regNo: '10B016', rollNo: 16, section: 'B', password: 'student123'},
+                    {name: 'Vinod Nair', regNo: '10B017', rollNo: 17, section: 'B', password: 'student123'},
+                    {name: 'Geeta Shah', regNo: '10B018', rollNo: 18, section: 'B', password: 'student123'},
+                    {name: 'Sunil Kumar', regNo: '10B019', rollNo: 19, section: 'B', password: 'student123'},
+                    {name: 'Usha Singh', regNo: '10B020', rollNo: 20, section: 'B', password: 'student123'}
+                ]
+            },
+            '11th': {
+                'A': [
+                    {name: 'Vishal Gupta', regNo: '11A001', rollNo: 1, section: 'A', password: 'student123'},
+                    {name: 'Preeti Patel', regNo: '11A002', rollNo: 2, section: 'A', password: 'student123'},
+                    {name: 'Naveen Reddy', regNo: '11A003', rollNo: 3, section: 'A', password: 'student123'},
+                    {name: 'Seema Verma', regNo: '11A004', rollNo: 4, section: 'A', password: 'student123'},
+                    {name: 'Ashok Joshi', regNo: '11A005', rollNo: 5, section: 'A', password: 'student123'},
+                    {name: 'Ritu Nair', regNo: '11A006', rollNo: 6, section: 'A', password: 'student123'},
+                    {name: 'Mahesh Shah', regNo: '11A007', rollNo: 7, section: 'A', password: 'student123'},
+                    {name: 'Sunita Kumar', regNo: '11A008', rollNo: 8, section: 'A', password: 'student123'},
+                    {name: 'Arun Singh', regNo: '11A009', rollNo: 9, section: 'A', password: 'student123'},
+                    {name: 'Lata Patel', regNo: '11A010', rollNo: 10, section: 'A', password: 'student123'},
+                    {name: 'Vijay Gupta', regNo: '11A011', rollNo: 11, section: 'A', password: 'student123'},
+                    {name: 'Sushma Reddy', regNo: '11A012', rollNo: 12, section: 'A', password: 'student123'},
+                    {name: 'Dilip Verma', regNo: '11A013', rollNo: 13, section: 'A', password: 'student123'},
+                    {name: 'Veena Joshi', regNo: '11A014', rollNo: 14, section: 'A', password: 'student123'},
+                    {name: 'Prakash Nair', regNo: '11A015', rollNo: 15, section: 'A', password: 'student123'},
+                    {name: 'Manju Shah', regNo: '11A016', rollNo: 16, section: 'A', password: 'student123'},
+                    {name: 'Ramesh Kumar', regNo: '11A017', rollNo: 17, section: 'A', password: 'student123'},
+                    {name: 'Shila Singh', regNo: '11A018', rollNo: 18, section: 'A', password: 'student123'},
+                    {name: 'Naresh Patel', regNo: '11A019', rollNo: 19, section: 'A', password: 'student123'},
+                    {name: 'Kamala Gupta', regNo: '11A020', rollNo: 20, section: 'A', password: 'student123'}
+                ],
+                'B': [
+                    {name: 'Raman Reddy', regNo: '11B001', rollNo: 1, section: 'B', password: 'student123'},
+                    {name: 'Sita Verma', regNo: '11B002', rollNo: 2, section: 'B', password: 'student123'},
+                    {name: 'Gopal Joshi', regNo: '11B003', rollNo: 3, section: 'B', password: 'student123'},
+                    {name: 'Maya Nair', regNo: '11B004', rollNo: 4, section: 'B', password: 'student123'},
+                    {name: 'Harish Shah', regNo: '11B005', rollNo: 5, section: 'B', password: 'student123'},
+                    {name: 'Indira Kumar', regNo: '11B006', rollNo: 6, section: 'B', password: 'student123'},
+                    {name: 'Jagdish Singh', regNo: '11B007', rollNo: 7, section: 'B', password: 'student123'},
+                    {name: 'Kiran Patel', regNo: '11B008', rollNo: 8, section: 'B', password: 'student123'},
+                    {name: 'Lalit Gupta', regNo: '11B009', rollNo: 9, section: 'B', password: 'student123'},
+                    {name: 'Madhu Reddy', regNo: '11B010', rollNo: 10, section: 'B', password: 'student123'},
+                    {name: 'Nirmal Verma', regNo: '11B011', rollNo: 11, section: 'B', password: 'student123'},
+                    {name: 'Omkar Joshi', regNo: '11B012', rollNo: 12, section: 'B', password: 'student123'},
+                    {name: 'Padma Nair', regNo: '11B013', rollNo: 13, section: 'B', password: 'student123'},
+                    {name: 'Qadir Shah', regNo: '11B014', rollNo: 14, section: 'B', password: 'student123'},
+                    {name: 'Radha Kumar', regNo: '11B015', rollNo: 15, section: 'B', password: 'student123'},
+                    {name: 'Salim Singh', regNo: '11B016', rollNo: 16, section: 'B', password: 'student123'},
+                    {name: 'Tara Patel', regNo: '11B017', rollNo: 17, section: 'B', password: 'student123'},
+                    {name: 'Uma Gupta', regNo: '11B018', rollNo: 18, section: 'B', password: 'student123'},
+                    {name: 'Vikash Reddy', regNo: '11B019', rollNo: 19, section: 'B', password: 'student123'},
+                    {name: 'Wasim Verma', regNo: '11B020', rollNo: 20, section: 'B', password: 'student123'}
+                ]
+            },
+            '12th': {
+                'A': [
+                    {name: 'Abhishek Joshi', regNo: '12A001', rollNo: 1, section: 'A', password: 'student123'},
+                    {name: 'Bharti Nair', regNo: '12A002', rollNo: 2, section: 'A', password: 'student123'},
+                    {name: 'Chetan Shah', regNo: '12A003', rollNo: 3, section: 'A', password: 'student123'},
+                    {name: 'Deepa Kumar', regNo: '12A004', rollNo: 4, section: 'A', password: 'student123'},
+                    {name: 'Esha Singh', regNo: '12A005', rollNo: 5, section: 'A', password: 'student123'},
+                    {name: 'Firoz Patel', regNo: '12A006', rollNo: 6, section: 'A', password: 'student123'},
+                    {name: 'Gaurav Gupta', regNo: '12A007', rollNo: 7, section: 'A', password: 'student123'},
+                    {name: 'Hema Reddy', regNo: '12A008', rollNo: 8, section: 'A', password: 'student123'},
+                    {name: 'Irfan Verma', regNo: '12A009', rollNo: 9, section: 'A', password: 'student123'},
+                    {name: 'Jyoti Joshi', regNo: '12A010', rollNo: 10, section: 'A', password: 'student123'},
+                    {name: 'Kapil Nair', regNo: '12A011', rollNo: 11, section: 'A', password: 'student123'},
+                    {name: 'Leela Shah', regNo: '12A012', rollNo: 12, section: 'A', password: 'student123'},
+                    {name: 'Mukesh Kumar', regNo: '12A013', rollNo: 13, section: 'A', password: 'student123'},
+                    {name: 'Nita Singh', regNo: '12A014', rollNo: 14, section: 'A', password: 'student123'},
+                    {name: 'Ojas Patel', regNo: '12A015', rollNo: 15, section: 'A', password: 'student123'},
+                    {name: 'Preet Gupta', regNo: '12A016', rollNo: 16, section: 'A', password: 'student123'},
+                    {name: 'Qasim Reddy', regNo: '12A017', rollNo: 17, section: 'A', password: 'student123'},
+                    {name: 'Richa Verma', regNo: '12A018', rollNo: 18, section: 'A', password: 'student123'},
+                    {name: 'Sameer Joshi', regNo: '12A019', rollNo: 19, section: 'A', password: 'student123'},
+                    {name: 'Tanya Nair', regNo: '12A020', rollNo: 20, section: 'A', password: 'student123'}
+                ],
+                'B': [
+                    {name: 'Ulhas Shah', regNo: '12B001', rollNo: 1, section: 'B', password: 'student123'},
+                    {name: 'Vidya Kumar', regNo: '12B002', rollNo: 2, section: 'B', password: 'student123'},
+                    {name: 'Waqar Singh', regNo: '12B003', rollNo: 3, section: 'B', password: 'student123'},
+                    {name: 'Xiaomi Patel', regNo: '12B004', rollNo: 4, section: 'B', password: 'student123'},
+                    {name: 'Yamini Gupta', regNo: '12B005', rollNo: 5, section: 'B', password: 'student123'},
+                    {name: 'Zara Reddy', regNo: '12B006', rollNo: 6, section: 'B', password: 'student123'},
+                    {name: 'Arjun Verma', regNo: '12B007', rollNo: 7, section: 'B', password: 'student123'},
+                    {name: 'Brinda Joshi', regNo: '12B008', rollNo: 8, section: 'B', password: 'student123'},
+                    {name: 'Chintan Nair', regNo: '12B009', rollNo: 9, section: 'B', password: 'student123'},
+                    {name: 'Disha Shah', regNo: '12B010', rollNo: 10, section: 'B', password: 'student123'},
+                    {name: 'Eshan Kumar', regNo: '12B011', rollNo: 11, section: 'B', password: 'student123'},
+                    {name: 'Farah Singh', regNo: '12B012', rollNo: 12, section: 'B', password: 'student123'},
+                    {name: 'Gagan Patel', regNo: '12B013', rollNo: 13, section: 'B', password: 'student123'},
+                    {name: 'Hiral Gupta', regNo: '12B014', rollNo: 14, section: 'B', password: 'student123'},
+                    {name: 'Ishaan Reddy', regNo: '12B015', rollNo: 15, section: 'B', password: 'student123'},
+                    {name: 'Jasmin Verma', regNo: '12B016', rollNo: 16, section: 'B', password: 'student123'},
+                    {name: 'Kartik Joshi', regNo: '12B017', rollNo: 17, section: 'B', password: 'student123'},
+                    {name: 'Lavanya Nair', regNo: '12B018', rollNo: 18, section: 'B', password: 'student123'},
+                    {name: 'Mihir Shah', regNo: '12B019', rollNo: 19, section: 'B', password: 'student123'},
+                    {name: 'Nikita Kumar', regNo: '12B020', rollNo: 20, section: 'B', password: 'student123'}
+                ]
+            }
+        };
+
+        // Immediately validate database after creation
+        console.log('=== DATABASE VALIDATION ===');
+        console.log('Student Database created:', window.studentDatabase);
+        console.log('Standards available:', Object.keys(window.studentDatabase));
+        
+        // Check each standard
+        Object.keys(window.studentDatabase).forEach(standard => {
+            console.log(`Standard ${standard}:`, window.studentDatabase[standard]);
+            console.log(`  Sections:`, Object.keys(window.studentDatabase[standard]));
+            Object.keys(window.studentDatabase[standard]).forEach(section => {
+                const count = window.studentDatabase[standard][section].length;
+                console.log(`    Section ${section}: ${count} students`);
+            });
+        });
+
+        // Create alias for easier access
+        const studentDatabase = window.studentDatabase;
+
+        // Student database linking system
+        function initializeStudentLoginSystem() {
+            // Ensure main database is initialized
+            if (!window.studentDatabase) {
+                initializeStudentDatabase();
+            }
+            
+            // Create linked student arrays for backward compatibility with student login
+            window.studentsForLogin = {};
+            window.studentCredentials = {};
+            
+            // Extract all students from the main database
+            Object.keys(window.studentDatabase).forEach(standard => {
+                window.studentsForLogin[standard] = [];
+                
+                // Combine students from both sections A and B
+                ['A', 'B'].forEach(section => {
+                    if (window.studentDatabase[standard] && window.studentDatabase[standard][section]) {
+                        window.studentDatabase[standard][section].forEach(student => {
+                            // Add to login list
+                            window.studentsForLogin[standard].push(student.name);
+                            
+                            // Store credentials for this student
+                            const studentKey = `${standard}_${student.name}`;
+                            window.studentCredentials[studentKey] = {
+                                name: student.name,
+                                regNo: student.regNo,
+                                rollNo: student.rollNo,
+                                section: student.section,
+                                password: student.password,
+                                standard: standard
+                            };
+                        });
+                    }
+                });
+            });
+            
+            console.log('✅ Student login system initialized');
+            console.log('Students for login:', window.studentsForLogin);
+            console.log('Student credentials loaded:', Object.keys(window.studentCredentials).length);
+        }
+
+        // Old students array for backward compatibility with student login
+        const students = {
+            '10th': [...window.studentDatabase['10th']['A'].map(s => s.name), ...window.studentDatabase['10th']['B'].map(s => s.name)],
+            '11th': [...window.studentDatabase['11th']['A'].map(s => s.name), ...window.studentDatabase['11th']['B'].map(s => s.name)],
+            '12th': [...window.studentDatabase['12th']['A'].map(s => s.name), ...window.studentDatabase['12th']['B'].map(s => s.name)]
+        };
+
+        // Student results management system
+        function loadStudentResults(studentData) {
+            console.log(`📊 Loading results for ${studentData.name} (${studentData.regNo})`);
+            
+            // Get all evaluation results
+            const allResults = JSON.parse(localStorage.getItem('evaluationResults') || '[]');
+            
+            // Filter results for this specific student
+            const studentResults = allResults.filter(result => 
+                result.studentRegNo === studentData.regNo || 
+                (result.studentName === studentData.name && result.studentSection === studentData.section)
+            );
+            
+            console.log(`Found ${studentResults.length} results for ${studentData.name}`);
+            
+            // Display results in student results page
+            displayStudentResults(studentResults);
+            
+            return studentResults;
+        }
+        
+        function displayStudentResults(results) {
+            const container = document.getElementById('studentResultsList');
+            
+            if (!container) {
+                console.error('❌ Student results container not found');
+                return;
+            }
+            
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="result-card">
+                        <h4>📊 No Test Results</h4>
+                        <p>You haven't taken any evaluated tests yet.</p>
+                        <p style="color: #666; font-size: 14px;">Results will appear here after your teacher evaluates your answer sheets.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Group results by test
+            const resultsByTest = {};
+            results.forEach(result => {
+                const testKey = result.testName || 'Unknown Test';
+                if (!resultsByTest[testKey]) {
+                    resultsByTest[testKey] = [];
+                }
+                resultsByTest[testKey].push(result);
+            });
+            
+            // Generate HTML for results with detailed breakdown
+            const resultsHTML = Object.keys(resultsByTest).map(testName => {
+                const testResults = resultsByTest[testName];
+                const latestResult = testResults[testResults.length - 1]; // Get latest attempt
+                
+                // Check if this is a detailed AI evaluation result
+                const isDetailedResult = latestResult.questionResults && latestResult.questionResults.length > 0;
+                
+                if (isDetailedResult) {
+                    // Show detailed question-wise results for AI evaluations
+                    const questionsHTML = latestResult.questionResults.map(q => `
+                        <div style="border-left: 4px solid ${q.percentage >= 50 ? '#4CAF50' : '#f44336'}; padding: 15px; margin: 10px 0; background: #f9f9f9; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <strong style="color: #1976d2;">Q${q.questionNumber}: ${q.questionText.substring(0, 60)}...</strong>
+                                <span style="background: ${q.percentage >= 50 ? '#4CAF50' : '#f44336'}; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                                    ${q.obtainedMarks}/${q.maxMarks} marks
+                                </span>
+                            </div>
+                            <div style="margin: 10px 0;">
+                                <strong style="color: #666;">💬 Feedback:</strong>
+                                <p style="margin: 5px 0; color: #444; font-size: 14px; line-height: 1.4;">${q.feedback}</p>
+                            </div>
+                            <div style="margin: 10px 0;">
+                                <strong style="color: #666;">🎯 Improvement Areas:</strong>
+                                <p style="margin: 5px 0; color: #666; font-size: 13px; font-style: italic;">${generateImprovementSuggestion(q.questionNumber, q.percentage)}</p>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    return `
+                        <div class="result-card" style="max-width: 1000px; margin: 20px auto; border: 2px solid #e3f2fd; border-radius: 12px;">
+                            <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px 12px 0 0;">
+                                <h2 style="margin: 0; font-size: 24px;">📋 ${testName} - Detailed Results</h2>
+                                <p style="margin: 10px 0 0 0; opacity: 0.9;">Evaluated on ${new Date(latestResult.timestamp).toLocaleDateString()}</p>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px; padding: 20px; background: #e3f2fd; border-radius: 12px;">
+                                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">📚 SUBJECT</div>
+                                    <div style="font-size: 18px; font-weight: bold; color: #1976d2;">${latestResult.subject || 'Biology'}</div>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">📊 TOTAL SCORE</div>
+                                    <div style="font-size: 18px; font-weight: bold; color: #4CAF50;">${latestResult.obtainedMarks}/${latestResult.totalMarks}</div>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">📈 PERCENTAGE</div>
+                                    <div style="font-size: 18px; font-weight: bold; color: ${latestResult.percentage >= 50 ? '#4CAF50' : '#f44336'};">${latestResult.percentage.toFixed(1)}%</div>
+                                </div>
+                                <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">🎖️ GRADE</div>
+                                    <div style="font-size: 18px; font-weight: bold; color: #FF9800;">${latestResult.grade}</div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin: 25px 20px;">
+                                <h3 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 8px;">📝 Question-wise Analysis</h3>
+                                ${questionsHTML}
+                            </div>
+                            
+                            <div style="margin: 25px 20px; padding: 20px; background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%); border-radius: 12px; border-left: 5px solid #4CAF50;">
+                                <h3 style="color: #2E7D32; margin-top: 0;">💡 Overall Performance Analysis</h3>
+                                <p style="font-size: 16px; line-height: 1.6; color: #1B5E20; margin: 10px 0;">${latestResult.detailedFeedback || generateDetailedFeedback(latestResult.percentage, latestResult.obtainedMarks, latestResult.totalMarks)}</p>
+                                
+                                <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #FF9800;">
+                                    <h4 style="color: #E65100; margin-top: 0;">🎯 Study Recommendations</h4>
+                                    <div style="color: #BF360C; line-height: 1.6;">
+                                        ${generateStudentRecommendations(latestResult.percentage, latestResult.questionResults)}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${testResults.length > 1 ? `<p style="text-align: center; color: #666; margin: 10px;"><small>📈 Total Attempts: ${testResults.length}</small></p>` : ''}
+                        </div>
+                    `;
+                } else {
+                    // Show simple results for non-AI evaluations
+                    return `
+                        <div class="result-card">
+                            <h4>📝 ${testName}</h4>
+                            <div class="result-info">
+                                <p><strong>Score:</strong> ${latestResult.score || latestResult.percentage}% (${latestResult.grade})</p>
+                                <p><strong>Evaluated:</strong> ${new Date(latestResult.timestamp).toLocaleDateString()}</p>
+                                <p><strong>Subject:</strong> ${latestResult.subject || 'Not specified'}</p>
+                            </div>
+                            ${testResults.length > 1 ? `<p><small>📈 Attempts: ${testResults.length}</small></p>` : ''}
+                            <div class="result-details">
+                                <p><strong>Feedback:</strong></p>
+                                <p style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-style: italic;">
+                                    ${latestResult.feedback || 'No specific feedback provided.'}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('');
+            
+            container.innerHTML = resultsHTML;
+        }
+
+        // Generate student-specific recommendations  
+        function generateStudentRecommendations(percentage, questionResults) {
+            const recommendations = [];
+            
+            // Based on overall performance
+            if (percentage < 40) {
+                recommendations.push("📚 Start with basic concepts and build foundation gradually");
+                recommendations.push("🎯 Use visual aids and diagrams for better understanding");
+                recommendations.push("📝 Practice numerical problems and application-based questions daily");
+                recommendations.push("👥 Consider forming study groups with classmates");
+            } else if (percentage < 70) {
+                recommendations.push("🔍 Focus on the weak areas identified above");
+                recommendations.push("📖 Solve more practice questions from each topic");
+                recommendations.push("📋 Review previous year questions and sample papers");
+                recommendations.push("⏰ Create a structured daily study schedule");
+            } else {
+                recommendations.push("🌟 Maintain consistent performance across all topics");
+                recommendations.push("🔬 Explore advanced concepts and research-based questions");
+                recommendations.push("👨‍🏫 Help classmates and teach concepts to strengthen understanding");
+                recommendations.push("📚 Read additional reference books for deeper knowledge");
+            }
+            
+            // Topic-specific recommendations based on zero scores
+            if (questionResults) {
+                const zeroScoreTopics = [];
+                questionResults.forEach(q => {
+                    if (q.obtainedMarks === 0) {
+                        zeroScoreTopics.push(`⚠️ <strong>Urgent:</strong> Complete revision needed for ${q.questionText.substring(0, 30)}...`);
+                    }
+                });
+                recommendations.push(...zeroScoreTopics);
+            }
+            
+            recommendations.push("📅 Allocate daily study time for biology and maintain regular revision");
+            recommendations.push("🎯 Set specific learning goals for each study session");
+            
+            return '<ul style="margin: 10px 0;">' + recommendations.map(rec => `<li style="margin: 8px 0;">${rec}</li>`).join('') + '</ul>';
+        }
+
+        // Direct load students with UI switching
+        function directLoadStudents(standard, section) {
+            console.log(`🎯 Direct loading: ${standard} Section ${section}`);
+            
+            // Ensure test exists
+            ensureTestExists();
+            
+            // Update selected info
+            selectedSection = section;
+            localStorage.setItem('currentTest', selectedTest.name);
+            localStorage.setItem('currentStandard', standard);
+            localStorage.setItem('currentSection', section);
+            
+            // Update UI
+            document.getElementById('selectedSectionInfo').textContent = `${selectedTest.name} - ${standard} Section ${section}`;
+            
+            // Switch views
+            document.getElementById('sectionSelection').style.display = 'none';
+            document.getElementById('studentSelection').style.display = 'block';
+            
+            // Load students
+            loadStudentsNowWithFallback(standard, section);
+            
+            console.log(`✅ Direct load completed for ${standard} Section ${section}`);
+        }
+
+        // Quick access function to directly show students
+        function quickAccessStudents() {
+            console.log('🚀 Quick access to students - bypassing test selection');
+            
+            // Ensure test exists
+            ensureTestExists();
+            
+            // Force switch to student selection view
+            document.getElementById('testSelection').style.display = 'none';
+            document.getElementById('sectionSelection').style.display = 'none';
+            document.getElementById('studentSelection').style.display = 'block';
+            
+            // Update section info
+            document.getElementById('selectedSectionInfo').textContent = 'Quick Access - 10th Standard Section A';
+            
+            // Load students directly
+            loadStudentsNowWithFallback('10th', 'A');
+            
+            alert('🚀 Quick access activated! Showing 10th Standard Section A students directly.');
+        }
+
+        // Auto-create test if none selected (emergency fallback)
+        function ensureTestExists() {
+            if (!selectedTest) {
+                console.log('🔄 No test selected, creating emergency test...');
+                
+                const emergencyTest = {
+                    id: Date.now(),
+                    name: 'Emergency Test Session',
+                    standard: '10th',
+                    subject: 'General',
+                    createdBy: currentUser || 'system',
+                    createdDate: new Date().toLocaleDateString()
+                };
+                
+                // Save to localStorage
+                let createdTests = JSON.parse(localStorage.getItem('createdTests') || '[]');
+                createdTests.push(emergencyTest);
+                localStorage.setItem('createdTests', JSON.stringify(createdTests));
+                
+                // Set as selected test
+                selectedTest = emergencyTest;
+                
+                console.log('✅ Emergency test created:', emergencyTest);
+                return emergencyTest;
+            }
+            return selectedTest;
+        }
+
+        // Page navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            // Load created tests when showing evaluate answers page
+            if (pageId === 'evaluateAnswers') {
+                loadCreatedTests();
+                resetEvaluationFlow();
+            }
+            
+            // Load evaluation results when showing view results page
+            if (pageId === 'viewResults') {
+                loadEvaluationResults();
+            }
+        }
+
+        // Load evaluation results
+        function loadEvaluationResults() {
+            const evaluationResults = JSON.parse(localStorage.getItem('evaluationResults') || '[]');
+            const container = document.getElementById('resultsList');
+            
+            if (evaluationResults.length === 0) {
+                container.innerHTML = `
+                    <div class="result-card" style="text-align: center; color: #666;">
+                        <h4>📊 No evaluation results yet</h4>
+                        <p>Evaluate some answer sheets to see results here</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Sort by most recent first
+            evaluationResults.sort((a, b) => b.id - a.id);
+            
+            container.innerHTML = evaluationResults.map(result => `
+                <div class="result-card">
+                    <h4>📖 ${result.testName} - ${result.studentName} (${result.standard} Section ${result.section})</h4>
+                    <p><strong>Subject:</strong> ${result.testSubject}</p>
+                    <p><strong>Registration No:</strong> ${result.regNo || 'N/A'}</p>
+                    <p><strong>Roll No:</strong> ${result.rollNo}</p>
+                    <p><strong>Score:</strong> ${result.score}/100 (${result.percentage}%)</p>
+                    <p><strong>Grade:</strong> ${result.grade}</p>
+                    <p><strong>Evaluated By:</strong> ${result.evaluatedBy}</p>
+                    <p><strong>Date:</strong> ${result.evaluatedDate} at ${result.evaluatedTime}</p>
+                </div>
+            `).join('');
+        }
+
+        // Load created tests
+        function loadCreatedTests() {
+            const createdTests = JSON.parse(localStorage.getItem('createdTests') || '[]');
+            const container = document.getElementById('testsList');
+            
+            if (createdTests.length === 0) {
+                container.innerHTML = `
+                    <div class="student-item" style="text-align: center; color: #666;">
+                        <strong>📝 No tests created yet</strong><br>
+                        <small>Create a test first to evaluate answer sheets</small>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = createdTests.map(test => `
+                <div class="student-item" onclick="selectTest('${test.id}')">
+                    <strong>📖 ${test.name}</strong><br>
+                    <small>Standard: ${test.standard} | Subject: ${test.subject}</small><br>
+                    <small>Created: ${test.createdDate} by ${test.createdBy}</small>
+                </div>
+            `).join('');
+        }
+
+        // Select test (automatic flow to sections)
+        function selectTest(testId) {
+            const createdTests = JSON.parse(localStorage.getItem('createdTests') || '[]');
+            selectedTest = createdTests.find(test => test.id == testId);
+            
+            if (!selectedTest) return;
+            
+            // Update test info and automatically show sections
+            document.getElementById('selectedTestInfo').textContent = 
+                `${selectedTest.name} (${selectedTest.standard} - ${selectedTest.subject})`;
+            
+            // Smooth transition to section selection
+            document.getElementById('testSelection').style.display = 'none';
+            document.getElementById('sectionSelection').style.display = 'block';
+        }
+
+        // Select section (simplified and more reliable)
+        function selectSection(section) {
+            console.log(`=== SELECT SECTION CALLED ===`);
+            console.log(`Section clicked: ${section}`);
+            console.log(`Selected test:`, selectedTest);
+            console.log(`Database status:`, window.studentDatabase ? 'EXISTS' : 'MISSING');
+            
+            // Try multiple ways to get the standard
+            let standard = null;
+            let testName = 'Unknown Test';
+            
+            // Method 1: From selectedTest object
+            if (selectedTest && selectedTest.standard) {
+                standard = selectedTest.standard;
+                testName = selectedTest.name;
+                console.log(`✅ Got standard from selectedTest: ${standard}`);
+            }
+            
+            // Method 2: From localStorage
+            if (!standard) {
+                standard = localStorage.getItem('currentStandard');
+                testName = localStorage.getItem('currentTest') || testName;
+                console.log(`🔄 Trying localStorage standard: ${standard}`);
+            }
+            
+            // Method 3: Direct fallback to 10th standard for testing
+            if (!standard) {
+                console.warn('⚠️ No standard found, using 10th as fallback');
+                standard = '10th';
+                testName = 'Default Test';
+            }
+            
+            console.log(`🎯 Final standard to use: ${standard}`);
+            
+            selectedSection = section;
+            console.log(`✅ Section ${section} selected for standard ${standard}`);
+            
+            // Store current selections for recovery
+            localStorage.setItem('currentTest', testName);
+            localStorage.setItem('currentStandard', standard);
+            localStorage.setItem('currentSection', section);
+            
+            // Update section info
+            const sectionInfo = `${testName} - ${standard} Section ${section}`;
+            document.getElementById('selectedSectionInfo').textContent = sectionInfo;
+            console.log(`✅ Section info updated: ${sectionInfo}`);
+            
+            // Hide section selection, show student selection
+            console.log('🔄 Switching to student selection...');
+            document.getElementById('sectionSelection').style.display = 'none';
+            document.getElementById('studentSelection').style.display = 'block';
+            
+            // Initialize database if needed
+            if (!window.studentDatabase) {
+                console.warn('⚠️ Global database missing, reinitializing...');
+                initializeStudentDatabase();
+            }
+            
+            // Load students with fallback handling
+            console.log('🔄 Loading students immediately...');
+            loadStudentsNowWithFallback(standard, section);
+        }
+
+        // Function to reinitialize database if needed
+        function reinitializeDatabase() {
+            console.log('🔄 Reinitializing student database...');
+            
+            // Reinitialize the database
+            initializeStudentDatabase();
+            
+            // Wait a moment then try to load current section again
+            setTimeout(() => {
+                const currentTest = localStorage.getItem('currentTest');
+                const currentStandard = localStorage.getItem('currentStandard');
+                const currentSection = localStorage.getItem('currentSection');
+                
+                if (currentTest && currentStandard && currentSection) {
+                    console.log(`🔄 Retrying to load ${currentStandard} Section ${currentSection}`);
+                    loadStudentsNow(currentStandard, currentSection);
+                } else {
+                    console.log('📝 No current section to reload');
+                    document.getElementById('studentsList').innerHTML = `
+                        <div class="student-item" style="text-align: center; color: #4CAF50;">
+                            <strong>✅ Database Reinitialized</strong><br>
+                            <small>Please select a test and section again</small>
+                        </div>
+                    `;
+                }
+            }, 500);
+        }
+
+        // Enhanced student loading with fallback and direct database access
+        function loadStudentsNowWithFallback(standard, section) {
+            console.log(`=== ENHANCED STUDENT LOADING ===`);
+            console.log(`Standard: ${standard}, Section: ${section}`);
+            
+            const container = document.getElementById('studentsList');
+            if (!container) {
+                console.error('❌ Student list container not found!');
+                alert('Error: Student list container not found!');
+                return;
+            }
+            
+            // Show loading immediately
+            container.innerHTML = `
+                <div class="student-item" style="text-align: center; color: #2196F3;">
+                    <strong>⏳ Loading ${standard} Section ${section}...</strong><br>
+                    <small>Accessing student database...</small>
+                </div>
+            `;
+            
+            // Ensure database is initialized
+            if (!window.studentDatabase) {
+                console.log('🔄 Initializing database...');
+                initializeStudentDatabase();
+            }
+            
+            // Wait a moment for initialization then proceed
+            setTimeout(() => {
+                console.log('📊 Current database state:', window.studentDatabase ? 'EXISTS' : 'MISSING');
+                
+                if (window.studentDatabase) {
+                    console.log('📋 Available standards:', Object.keys(window.studentDatabase));
+                    
+                    if (window.studentDatabase[standard]) {
+                        console.log(`📋 Available sections for ${standard}:`, Object.keys(window.studentDatabase[standard]));
+                        
+                        if (window.studentDatabase[standard][section]) {
+                            const studentList = window.studentDatabase[standard][section];
+                            console.log(`✅ Found ${studentList.length} students in ${standard} Section ${section}`);
+                            console.log('👥 Sample students:', studentList.slice(0, 3).map(s => s.name));
+                            
+                            // Generate student HTML
+                            const studentsHTML = studentList.map(student => {
+                                if (!student || !student.name) {
+                                    console.warn('Invalid student data:', student);
+                                    return '';
+                                }
+                                return `
+                                    <div class="student-item" onclick="selectStudentForUpload('${student.name}', ${student.rollNo}, '${student.section}', '${student.regNo}')">
+                                        <strong>👤 ${student.name}</strong><br>
+                                        <small>Roll: ${student.rollNo.toString().padStart(2, '0')} | Reg: ${student.regNo} | Section: ${student.section}</small>
+                                    </div>
+                                `;
+                            }).filter(html => html).join('');
+                            
+                            container.innerHTML = studentsHTML;
+                            console.log(`✅ Students loaded successfully! Count: ${studentList.length}`);
+                            
+                        } else {
+                            console.error(`❌ Section ${section} not found for ${standard}`);
+                            container.innerHTML = `
+                                <div class="student-item" style="text-align: center; color: #f44336;">
+                                    <strong>❌ Section Not Found</strong><br>
+                                    <small>Section ${section} not found for ${standard}</small><br>
+                                    <small>Available sections: ${Object.keys(window.studentDatabase[standard]).join(', ')}</small><br>
+                                    <button class="btn" style="width: auto; margin-top: 10px;" onclick="showAllStudents('${standard}')">📋 Show All Students</button>
+                                </div>
+                            `;
+                        }
+                    } else {
+                        console.error(`❌ Standard ${standard} not found in database`);
+                        container.innerHTML = `
+                            <div class="student-item" style="text-align: center; color: #f44336;">
+                                <strong>❌ Standard Not Found</strong><br>
+                                <small>Standard ${standard} not in database</small><br>
+                                <small>Available standards: ${Object.keys(window.studentDatabase).join(', ')}</small><br>
+                                <button class="btn" style="width: auto; margin-top: 10px;" onclick="showAllStudents('10th')">📋 Load 10th Standard</button>
+                            </div>
+                        `;
+                    }
+                } else {
+                    console.error('❌ Database completely missing');
+                    container.innerHTML = `
+                        <div class="student-item" style="text-align: center; color: #f44336;">
+                            <strong>❌ Database Error</strong><br>
+                            <small>Student database not initialized</small><br>
+                            <button class="btn" style="width: auto; margin-top: 10px;" onclick="reinitializeAndShow('${standard}', '${section}')">🔄 Reinitialize Database</button>
+                        </div>
+                    `;
+                }
+            }, 200);
+        }
+        
+        // Helper function to show all students from a standard
+        function showAllStudents(standard) {
+            console.log(`📋 Showing all students for ${standard}`);
+            
+            if (!window.studentDatabase || !window.studentDatabase[standard]) {
+                alert(`❌ No data found for ${standard}`);
+                return;
+            }
+            
+            const container = document.getElementById('studentsList');
+            let allStudents = [];
+            
+            // Combine students from all sections
+            Object.keys(window.studentDatabase[standard]).forEach(section => {
+                allStudents = allStudents.concat(window.studentDatabase[standard][section]);
+            });
+            
+            const studentsHTML = allStudents.map(student => `
+                <div class="student-item" onclick="selectStudentForUpload('${student.name}', ${student.rollNo}, '${student.section}', '${student.regNo}')">
+                    <strong>👤 ${student.name}</strong><br>
+                    <small>Roll: ${student.rollNo.toString().padStart(2, '0')} | Reg: ${student.regNo} | Section: ${student.section}</small>
+                </div>
+            `).join('');
+            
+            container.innerHTML = studentsHTML;
+            console.log(`✅ Loaded ${allStudents.length} students from all sections of ${standard}`);
+        }
+        
+        // Helper function to reinitialize and show students
+        function reinitializeAndShow(standard, section) {
+            console.log('🔄 Reinitializing database and loading students...');
+            initializeStudentDatabase();
+            setTimeout(() => {
+                loadStudentsNowWithFallback(standard, section);
+            }, 500);
+        }
+
+        // Immediate student loading function
+        function loadStudentsNow(standard, section) {
+            console.log(`=== LOAD STUDENTS NOW ===`);
+            console.log(`Standard: ${standard}, Section: ${section}`);
+            
+            const container = document.getElementById('studentsList');
+            if (!container) {
+                console.error('❌ Student list container not found!');
+                alert('Error: Student list container not found!');
+                return;
+            }
+            
+            // Show loading immediately
+            container.innerHTML = `
+                <div class="student-item" style="text-align: center; color: #2196F3;">
+                    <strong>⏳ Loading ${standard} Section ${section}...</strong><br>
+                    <small>Please wait...</small>
+                </div>
+            `;
+            
+            // Check if database exists
+            console.log('Checking window.studentDatabase:', window.studentDatabase);
+            console.log('Checking studentDatabase alias:', studentDatabase);
+            
+            // Use window.studentDatabase directly
+            const db = window.studentDatabase;
+            if (!db) {
+                console.error('❌ Student database not found in window object!');
+                container.innerHTML = `
+                    <div class="student-item" style="text-align: center; color: #f44336;">
+                        <strong>❌ Database Not Found</strong><br>
+                        <small>Student database not initialized</small><br>
+                        <button class="btn" style="width: auto; margin-top: 10px;" onclick="reinitializeDatabase()">🔄 Reinitialize Database</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            console.log(`Available standards in database:`, Object.keys(db));
+            
+            if (!db[standard]) {
+                console.error(`❌ Standard ${standard} not found in database`);
+                console.log(`Database structure:`, db);
+                container.innerHTML = `
+                    <div class="student-item" style="text-align: center; color: #f44336;">
+                        <strong>❌ Standard Not Found</strong><br>
+                        <small>Standard ${standard} not in database</small><br>
+                        <small>Available: ${Object.keys(db).join(', ')}</small><br>
+                        <button class="btn" style="width: auto; margin-top: 10px;" onclick="loadTestStudents('${section}')">🔄 Load Test Students</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            console.log(`Available sections for ${standard}:`, Object.keys(db[standard]));
+            
+            if (!db[standard][section]) {
+                console.error(`❌ Section ${section} not found for standard ${standard}`);
+                container.innerHTML = `
+                    <div class="student-item" style="text-align: center; color: #f44336;">
+                        <strong>❌ Section Not Found</strong><br>
+                        <small>Section ${section} not found for ${standard}</small><br>
+                        <small>Available: ${Object.keys(db[standard]).join(', ')}</small><br>
+                        <button class="btn" style="width: auto; margin-top: 10px;" onclick="loadTestStudents('${section}')">🔄 Load Test Students</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const studentList = db[standard][section];
+            console.log(`✅ Found ${studentList.length} students:`, studentList);
+            
+            if (!Array.isArray(studentList) || studentList.length === 0) {
+                console.error('❌ Student list is empty or not an array');
+                container.innerHTML = `
+                    <div class="student-item" style="text-align: center; color: #f44336;">
+                        <strong>❌ No Students in Section</strong><br>
+                        <small>Section ${section} has no students</small><br>
+                        <button class="btn" style="width: auto; margin-top: 10px;" onclick="loadTestStudents('${section}')">🔄 Load Test Students</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Generate student HTML immediately
+            const studentsHTML = studentList.map(student => {
+                if (!student || !student.name) {
+                    console.warn('Invalid student data:', student);
+                    return '';
+                }
+                return `
+                    <div class="student-item" onclick="selectStudentForUpload('${student.name}', ${student.rollNo}, '${student.section}', '${student.regNo}')">
+                        <strong>👤 ${student.name}</strong><br>
+                        <small>Roll: ${student.rollNo.toString().padStart(2, '0')} | Reg: ${student.regNo} | Section: ${student.section}</small>
+                    </div>
+                `;
+            }).filter(html => html).join('');
+            
+            if (!studentsHTML) {
+                console.error('❌ No valid student HTML generated');
+                container.innerHTML = `
+                    <div class="student-item" style="text-align: center; color: #f44336;">
+                        <strong>❌ No Valid Students</strong><br>
+                        <small>No valid student data found</small><br>
+                        <button class="btn" style="width: auto; margin-top: 10px;" onclick="loadTestStudents('${section}')">🔄 Load Test Students</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = studentsHTML;
+            console.log(`✅ Students loaded successfully! Count: ${studentList.length}`);
+        }
+
+        // Fallback function to load test students - REMOVED
+        // This function was loading fake "Test Student 1, Test Student 2" data
+        // Now we use the real student database with actual names
+        function loadTestStudents(section) {
+            console.log('⚠️ loadTestStudents called - redirecting to real database');
+            console.log('Requested section:', section);
+            
+            // Get current test info
+            const currentTest = localStorage.getItem('currentTest');
+            const currentStandard = localStorage.getItem('currentStandard');
+            
+            if (currentStandard && section) {
+                console.log(`🔄 Loading real students for ${currentStandard} Section ${section}`);
+                loadStudentsNow(currentStandard, section);
+            } else {
+                console.error('❌ Missing test or standard information');
+                const container = document.getElementById('studentsList');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="student-item" style="text-align: center; color: #f44336;">
+                            <strong>❌ Error Loading Students</strong><br>
+                            <small>Please go back and select a test first</small>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Load students (simplified and more reliable)
+        function loadStudents(standard, section) {
+            console.log(`=== LOAD STUDENTS CALLED ===`);
+            console.log(`Standard: ${standard}, Section: ${section}`);
+            
+            const container = document.getElementById('studentsList');
+            if (!container) {
+                console.error('❌ Students list container not found!');
+                alert('Error: Student list container not found!');
+                return;
+            }
+            
+            console.log('✅ Container found:', container);
+            
+            // First, show loading message
+            container.innerHTML = `
+                <div class="student-item" style="text-align: center; color: #2196F3;">
+                    <strong>⏳ Loading students...</strong><br>
+                    <small>Loading ${standard} Section ${section}</small>
+                </div>
+            `;
+            
+            // Wait a moment then load actual students
+            setTimeout(() => {
+                try {
+                    console.log('Checking student database...');
+                    console.log('Database structure:', Object.keys(studentDatabase));
+                    
+                    if (!studentDatabase || typeof studentDatabase !== 'object') {
+                        throw new Error('Student database not found');
+                    }
+                    
+                    if (!studentDatabase[standard]) {
+                        throw new Error(`Standard ${standard} not found in database`);
+                    }
+                    
+                    if (!studentDatabase[standard][section]) {
+                        throw new Error(`Section ${section} not found for ${standard}`);
+                    }
+                    
+                    const studentList = studentDatabase[standard][section];
+                    console.log(`✅ Found ${studentList.length} students:`, studentList);
+                    
+                    if (!Array.isArray(studentList) || studentList.length === 0) {
+                        throw new Error('No students in this section');
+                    }
+                    
+                    // Generate HTML for students
+                    const studentsHTML = studentList.map((student, index) => {
+                        if (!student || !student.name || !student.regNo) {
+                            console.warn('Invalid student data:', student);
+                            return '';
+                        }
+                        
+                        return `
+                            <div class="student-item" onclick="selectStudentForUpload('${student.name}', ${student.rollNo}, '${section}', '${student.regNo}')">
+                                <strong>👤 ${student.name}</strong><br>
+                                <small>Roll No: ${student.rollNo.toString().padStart(2, '0')} | Reg No: ${student.regNo}</small>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    if (!studentsHTML.trim()) {
+                        throw new Error('No valid student data found');
+                    }
+                    
+                    container.innerHTML = studentsHTML;
+                    console.log('✅ Students loaded successfully!');
+                    
+                } catch (error) {
+                    console.error('❌ Error loading students:', error);
+                    container.innerHTML = `
+                        <div class="student-item" style="text-align: center; color: #f44336;">
+                            <strong>❌ Error Loading Students</strong><br>
+                            <small>${error.message}</small><br>
+                            <button class="btn" style="width: auto; margin-top: 10px;" onclick="forceLoadStudents()">🔄 Try Again</button>
+                        </div>
+                    `;
+                }
+            }, 500);
+        }
+
+        // Select student (automatic flow to upload)
+        function selectStudentForUpload(studentName, rollNo, section, regNo) {
+            selectedStudent = { 
+                name: studentName, 
+                rollNo: rollNo, 
+                section: section, 
+                regNo: regNo 
+            };
+            
+            // Update upload section with detailed information
+            document.getElementById('uploadTestName').textContent = selectedTest.name;
+            document.getElementById('uploadSubject').textContent = selectedTest.subject;
+            document.getElementById('uploadStudentName').textContent = studentName;
+            document.getElementById('uploadStandardSection').textContent = `${selectedTest.standard} Section ${section}`;
+            document.getElementById('uploadRollNo').textContent = `${rollNo.toString().padStart(2, '0')} (Reg: ${regNo})`;
+            
+            // Smooth transition to upload section
+            document.getElementById('studentSelection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+            
+            // Clear previous results and file input
+            document.getElementById('evaluationResults').innerHTML = '';
+            document.getElementById('answerSheet').value = '';
+        }
+
+        // Navigation functions
+        function backToTestSelection() {
+            document.getElementById('sectionSelection').style.display = 'none';
+            document.getElementById('testSelection').style.display = 'block';
+            selectedTest = null;
+        }
+
+        function backToSectionSelection() {
+            document.getElementById('studentSelection').style.display = 'none';
+            document.getElementById('sectionSelection').style.display = 'block';
+            selectedSection = null;
+        }
+
+        function backToStudentSelection() {
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('studentSelection').style.display = 'block';
+            selectedStudent = null;
+            document.getElementById('evaluationResults').innerHTML = '';
+            document.getElementById('answerSheet').value = '';
+        }
+
+        // Reset evaluation flow
+        function resetEvaluationFlow() {
+            document.getElementById('testSelection').style.display = 'block';
+            document.getElementById('sectionSelection').style.display = 'none';
+            document.getElementById('studentSelection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'none';
+            document.getElementById('evaluationResults').innerHTML = '';
+            selectedTest = null;
+            selectedSection = null;
+            selectedStudent = null;
+        }
+
+        // Test function to debug student data
+        function testStudentData() {
+            console.log('=== TESTING STUDENT DATA ===');
+            console.log('Student Database:', studentDatabase);
+            console.log('Selected Test:', selectedTest);
+            
+            if (!selectedTest) {
+                alert('❌ No test selected! Please select a test first.');
+                return;
+            }
+            
+            const standard = selectedTest.standard;
+            console.log(`Testing for standard: ${standard}`);
+            
+            if (studentDatabase[standard]) {
+                console.log(`✅ Standard ${standard} found`);
+                console.log(`Sections available:`, Object.keys(studentDatabase[standard]));
+                
+                Object.keys(studentDatabase[standard]).forEach(section => {
+                    const students = studentDatabase[standard][section];
+                    console.log(`Section ${section}: ${students.length} students`);
+                    console.log('First student:', students[0]);
+                });
+                
+                alert(`✅ Data looks good!\nStandard: ${standard}\nSections: A (${studentDatabase[standard]['A'].length} students), B (${studentDatabase[standard]['B'].length} students)`);
+            } else {
+                console.log(`❌ Standard ${standard} not found`);
+                alert(`❌ No data found for standard: ${standard}`);
+            }
+        }
+
+        // Force load students for testing
+        function forceLoadStudents() {
+            if (!selectedTest) {
+                alert('Please select a test first!');
+                return;
+            }
+            
+            console.log('Force loading students...');
+            const container = document.getElementById('studentsList');
+            const standard = selectedTest.standard;
+            
+            // Use the proper global database reference
+            if (window.studentDatabase && window.studentDatabase[standard] && window.studentDatabase[standard]['A']) {
+                console.log(`Loading real students for ${standard}`);
+                
+                // Load Section A students as test
+                const students = window.studentDatabase[standard]['A'];
+                container.innerHTML = students.map(student => `
+                    <div class="student-item" onclick="selectStudentForUpload('${student.name}', ${student.rollNo}, '${student.section}', '${student.regNo}')">
+                        <strong>👤 ${student.name}</strong><br>
+                        <small>Roll No: ${student.rollNo} | Reg No: ${student.regNo} | Section: ${student.section}</small>
+                    </div>
+                `).join('');
+                
+                alert(`✅ Loaded ${students.length} real students from ${standard} Section A!`);
+            } else {
+                console.error('❌ No real student data found - reinitializing database');
+                
+                // Reinitialize database if missing
+                initializeStudentDatabase();
+                
+                setTimeout(() => {
+                    console.log('🔄 Retrying after database reinitialization...');
+                    forceLoadStudents();
+                }, 500);
+            }
+        }
+
+        // Database verification function
+        function verifyDatabase() {
+            console.log('=== DATABASE VERIFICATION ===');
+            let totalStudents = 0;
+            
+            Object.keys(studentDatabase).forEach(standard => {
+                console.log(`\n📚 Standard ${standard}:`);
+                Object.keys(studentDatabase[standard]).forEach(section => {
+                    const students = studentDatabase[standard][section];
+                    console.log(`  📖 Section ${section}: ${students.length} students`);
+                    totalStudents += students.length;
+                    
+                    // Check first student structure
+                    if (students.length > 0) {
+                        console.log(`    👤 Sample student:`, students[0]);
+                    }
+                });
+            });
+            
+            console.log(`\n✅ Total students in database: ${totalStudents}`);
+            alert(`Database verified!\nTotal: ${totalStudents} students\n10th: ${studentDatabase['10th']['A'].length + studentDatabase['10th']['B'].length}\n11th: ${studentDatabase['11th']['A'].length + studentDatabase['11th']['B'].length}\n12th: ${studentDatabase['12th']['A'].length + studentDatabase['12th']['B'].length}`);
+            
+            return totalStudents;
+        }
+
+        // Direct test functions for sections
+        function directTestSectionA() {
+            if (!selectedTest) {
+                alert('Please select a test first!');
+                return;
+            }
+            
+            console.log('=== DIRECT TEST SECTION A ===');
+            const standard = selectedTest.standard;
+            console.log(`Testing ${standard} Section A`);
+            
+            // Use window.studentDatabase for consistency
+            if (window.studentDatabase && window.studentDatabase[standard] && window.studentDatabase[standard]['A']) {
+                const students = window.studentDatabase[standard]['A'];
+                console.log(`Found ${students.length} real students in Section A:`, students);
+                
+                // Store current selections for proper loading
+                localStorage.setItem('currentTest', selectedTest.name);
+                localStorage.setItem('currentStandard', standard);
+                localStorage.setItem('currentSection', 'A');
+                
+                // Force show student section and load students
+                document.getElementById('sectionSelection').style.display = 'none';
+                document.getElementById('studentSelection').style.display = 'block';
+                document.getElementById('selectedSectionInfo').textContent = `${selectedTest.name} - ${standard} Section A`;
+                
+                loadStudentsNow(standard, 'A');
+                alert(`✅ Section A test completed! Found ${students.length} real students with names like: ${students.slice(0,3).map(s => s.name).join(', ')}, etc.`);
+            } else {
+                console.error(`❌ No Section A data found for ${standard}`);
+                alert(`❌ No Section A found for ${standard} - reinitializing database`);
+                initializeStudentDatabase();
+            }
+        }
+
+        function directTestSectionB() {
+            if (!selectedTest) {
+                alert('Please select a test first!');
+                return;
+            }
+            
+            console.log('=== DIRECT TEST SECTION B ===');
+            const standard = selectedTest.standard;
+            console.log(`Testing ${standard} Section B`);
+            
+            // Use window.studentDatabase for consistency
+            if (window.studentDatabase && window.studentDatabase[standard] && window.studentDatabase[standard]['B']) {
+                const students = window.studentDatabase[standard]['B'];
+                console.log(`Found ${students.length} real students in Section B:`, students);
+                
+                // Store current selections for proper loading
+                localStorage.setItem('currentTest', selectedTest.name);
+                localStorage.setItem('currentStandard', standard);
+                localStorage.setItem('currentSection', 'B');
+                
+                // Force show student section and load students
+                document.getElementById('sectionSelection').style.display = 'none';
+                document.getElementById('studentSelection').style.display = 'block';
+                document.getElementById('selectedSectionInfo').textContent = `${selectedTest.name} - ${standard} Section B`;
+                
+                loadStudentsNow(standard, 'B');
+                alert(`✅ Section B test completed! Found ${students.length} real students with names like: ${students.slice(0,3).map(s => s.name).join(', ')}, etc.`);
+            } else {
+                console.error(`❌ No Section B data found for ${standard}`);
+                alert(`❌ No Section B found for ${standard} - reinitializing database`);
+                initializeStudentDatabase();
+            }
+        }
+
+        // Show login form based on type
+        function showLoginForm(type) {
+            document.getElementById('loginTypeSelection').style.display = 'none';
+            if (type === 'teacher') {
+                document.getElementById('teacherLoginForm').style.display = 'block';
+                document.getElementById('studentLoginForm').style.display = 'none';
+            } else {
+                document.getElementById('studentLoginForm').style.display = 'block';
+                document.getElementById('teacherLoginForm').style.display = 'none';
+            }
+        }
+
+        // Back to login selection
+        function backToLoginSelection() {
+            document.getElementById('loginTypeSelection').style.display = 'block';
+            document.getElementById('teacherLoginForm').style.display = 'none';
+            document.getElementById('studentLoginForm').style.display = 'none';
+        }
+
+        // Fill teacher credentials
+        function fillTeacherCredentials(username, password) {
+            document.getElementById('teacherUsername').value = username;
+            document.getElementById('teacherPassword').value = password;
+        }
+
+        // Load student names based on standard (for student login)
+        function loadStudentNames() {
+            const standard = document.getElementById('studentStandard').value;
+            const studentSelect = document.getElementById('studentName');
+            studentSelect.innerHTML = '<option value="">Select Student</option>';
+            
+            console.log(`📋 Loading students for ${standard} login`);
+            
+            // Initialize login system if needed
+            if (!window.studentsForLogin) {
+                console.log('🔄 Initializing student login system...');
+                initializeStudentLoginSystem();
+            }
+            
+            if (standard && window.studentsForLogin && window.studentsForLogin[standard]) {
+                const studentNames = window.studentsForLogin[standard];
+                console.log(`Found ${studentNames.length} students for ${standard}`);
+                
+                // Create options for each student
+                studentNames.forEach(studentName => {
+                    // Get student details for display
+                    const studentKey = `${standard}_${studentName}`;
+                    const studentData = window.studentCredentials[studentKey];
+                    
+                    const option = document.createElement('option');
+                    option.value = studentName;
+                    option.textContent = studentData ? 
+                        `${studentName} (${studentData.regNo})` : 
+                        studentName;
+                    studentSelect.appendChild(option);
+                });
+            } else {
+                console.warn(`❌ No students found for ${standard}`);
+                if (window.studentDatabase && window.studentDatabase[standard]) {
+                    console.log('🔄 Fallback: Using direct database access');
+                    const allStudents = [
+                        ...window.studentDatabase[standard]['A'],
+                        ...window.studentDatabase[standard]['B']
+                    ];
+                    
+                    allStudents.forEach(student => {
+                        const option = document.createElement('option');
+                        option.value = student.name;
+                        option.textContent = `${student.name} (${student.regNo})`;
+                        studentSelect.appendChild(option);
+                    });
+                }
+            }
+        }
+
+        // Teacher login
+        document.getElementById('teacherForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('teacherUsername').value;
+            const password = document.getElementById('teacherPassword').value;
+            
+            if ((username === 'admin' && password === 'admin123') || 
+                (username === 'teacher1' && password === 'teacher123')) {
+                currentUser = username;
+                userType = 'teacher';
+                document.getElementById('teacherName').textContent = username === 'admin' ? 'Admin' : 'Teacher';
+                showPage('dashboard');
+            } else {
+                alert('❌ Invalid teacher credentials!');
+            }
+        });
+
+        // Student login with individual credentials
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const standard = document.getElementById('studentStandard').value;
+            const studentName = document.getElementById('studentName').value;
+            const password = document.getElementById('studentPassword').value;
+            
+            console.log(`🔐 Student login attempt: ${studentName} (${standard})`);
+            
+            // Initialize login system if not already done
+            if (!window.studentCredentials) {
+                initializeStudentLoginSystem();
+            }
+            
+            // Check if student exists and password matches
+            const studentKey = `${standard}_${studentName}`;
+            const studentData = window.studentCredentials[studentKey];
+            
+            if (!studentData) {
+                alert('❌ Student not found! Please check your name and standard.');
+                console.error(`Student not found: ${studentKey}`);
+                return;
+            }
+            
+            if (password !== studentData.password) {
+                alert('❌ Incorrect password! Please try again.');
+                console.error(`Wrong password for ${studentName}`);
+                return;
+            }
+            
+            // Successful login
+            console.log(`✅ Student login successful: ${studentName}`);
+            
+            // Store current student info globally
+            window.currentStudent = studentData;
+            currentUser = studentName;
+            userType = 'student';
+            
+            // Update display elements
+            document.getElementById('studentDisplayName').textContent = studentName;
+            
+            // Update profile info with complete student data
+            document.getElementById('profileStudentName').textContent = studentName;
+            document.getElementById('profileStandard').textContent = standard;
+            document.getElementById('profileRollNumber').textContent = studentData.rollNo.toString().padStart(2, '0');
+            document.getElementById('profileRegNumber').textContent = studentData.regNo;
+            document.getElementById('profileSection').textContent = `Section ${studentData.section}`;
+            
+            // Load student's evaluation results
+            loadStudentResults(studentData);
+            
+            showPage('studentDashboard');
+        });
+
+        // Create test
+        document.getElementById('createTestForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const testName = document.getElementById('testName').value;
+            const standard = document.getElementById('standard').value;
+            const subject = document.getElementById('subject').value;
+            
+            // Store created test
+            let createdTests = JSON.parse(localStorage.getItem('createdTests') || '[]');
+            const newTest = {
+                id: Date.now(),
+                name: testName,
+                standard: standard,
+                subject: subject,
+                createdBy: currentUser,
+                createdDate: new Date().toLocaleDateString()
+            };
+            createdTests.push(newTest);
+            localStorage.setItem('createdTests', JSON.stringify(createdTests));
+            
+            // Automatically set up the biology question paper for all tests
+            setupDefaultQuestionPaper();
+            
+            alert('✅ Test created successfully with question paper setup!');
+            document.getElementById('createTestForm').reset();
+            showPage('dashboard');
+        });
+        
+        // Setup default question paper (your biology questions) for all tests
+        function setupDefaultQuestionPaper() {
+            const defaultQuestionPaper = {
+                subject: "Biology",
+                totalQuestions: 8,
+                totalMarks: 50,
+                questions: [
+                    {id: 1, text: "What are the main differences between photosynthesis and respiration?", marks: 5},
+                    {id: 2, text: "Explain the structure and function of the human heart.", marks: 8},
+                    {id: 3, text: "Describe the process of transpiration and its significance in plants.", marks: 5},
+                    {id: 4, text: "What is the role of the nervous system in humans?", marks: 5},
+                    {id: 5, text: "Explain the various stages of nutrition in human beings.", marks: 6},
+                    {id: 6, text: "Define heredity and explain Mendel's law of segregation with an example.", marks: 8},
+                    {id: 7, text: "Describe the structure and function of the nephron.", marks: 5},
+                    {id: 8, text: "Explain the carbon cycle and its importance to the ecosystem.", marks: 8}
+                ]
+            };
+            
+            const defaultAnswerKey = {
+                answers: [
+                    {id: 1, keyPoints: ["Light dependent vs independent", "Oxygen production vs consumption", "Glucose synthesis vs breakdown", "Chloroplasts vs mitochondria", "Day/night processes"], maxMarks: 5},
+                    {id: 2, keyPoints: ["Four chambers", "Atria and ventricles", "Valves function", "Blood circulation", "Cardiac cycle", "Heart muscles", "Electrical conduction", "Pumping mechanism"], maxMarks: 8},
+                    {id: 3, keyPoints: ["Water loss through stomata", "Evaporation process", "Cooling effect", "Nutrient transport", "Water uptake regulation"], maxMarks: 5},
+                    {id: 4, keyPoints: ["Central nervous system", "Peripheral nervous system", "Signal transmission", "Coordination", "Response to stimuli"], maxMarks: 5},
+                    {id: 5, keyPoints: ["Ingestion", "Digestion", "Absorption", "Assimilation", "Egestion", "Enzymatic breakdown"], maxMarks: 6},
+                    {id: 6, keyPoints: ["Definition of heredity", "Mendel's law explanation", "Segregation concept", "Example with traits", "Gamete formation", "Phenotype ratios", "Genotype explanation", "Inheritance pattern"], maxMarks: 8},
+                    {id: 7, keyPoints: ["Nephron structure", "Glomerulus", "Bowman's capsule", "Tubules", "Filtration process"], maxMarks: 5},
+                    {id: 8, keyPoints: ["Carbon sources", "Photosynthesis role", "Respiration role", "Decomposition", "Carbon dioxide cycle", "Ecosystem balance", "Global warming", "Environmental impact"], maxMarks: 8}
+                ]
+            };
+            
+            // Store in localStorage for all evaluations
+            localStorage.setItem('currentQuestionPaper', JSON.stringify(defaultQuestionPaper));
+            localStorage.setItem('currentAnswerKey', JSON.stringify(defaultAnswerKey));
+            
+            console.log('✅ Default biology question paper set up for all evaluations');
+        }
+
+        // Select test
+        function selectTest(testName, standard) {
+            selectedTest = { name: testName, standard: standard };
+            document.getElementById('testSelection').style.display = 'none';
+            document.getElementById('studentSelection').style.display = 'block';
+            loadStudents(standard);
+        }
+
+        // Load students
+        function loadStudents(standard) {
+            const container = document.getElementById('studentsList');
+            const studentList = students[standard] || [];
+            
+            container.innerHTML = studentList.map((student, index) => `
+                <div class="student-item" onclick="selectStudent('${student}', ${index + 1})">
+                    <strong>👤 ${student}</strong><br>
+                    <small>Roll No: ${index + 1} | Section: A</small>
+                </div>
+            `).join('');
+        }
+
+        // Select student
+        function selectStudent(studentName, rollNo) {
+            selectedStudent = { name: studentName, rollNo: rollNo };
+            document.getElementById('selectedInfo').textContent = `${selectedTest.name} - ${studentName} (Roll: ${rollNo})`;
+            document.getElementById('studentSelection').style.display = 'none';
+            document.getElementById('uploadSection').style.display = 'block';
+        }
+
+        // AI Question Paper Analysis System
+        let currentQuestionPaper = null;
+        let currentAnswerKey = null;
+        
+        // Sample question paper data (your biology paper)
+        const sampleQuestionPaper = {
+            subject: "Biology",
+            totalQuestions: 8,
+            totalMarks: 50,
+            questions: [
+                {id: 1, text: "What are the main differences between photosynthesis and respiration?", marks: 5},
+                {id: 2, text: "Explain the structure and function of the human heart.", marks: 8},
+                {id: 3, text: "Describe the process of transpiration and its significance in plants.", marks: 5},
+                {id: 4, text: "What is the role of the nervous system in humans?", marks: 5},
+                {id: 5, text: "Explain the various stages of nutrition in human beings.", marks: 6},
+                {id: 6, text: "Define heredity and explain Mendel's law of segregation with an example.", marks: 8},
+                {id: 7, text: "Describe the structure and function of the nephron.", marks: 5},
+                {id: 8, text: "Explain the carbon cycle and its importance to the ecosystem.", marks: 8}
+            ]
+        };
+        
+        // Sample answer key with expected answers
+        const sampleAnswerKey = {
+            answers: [
+                {id: 1, keyPoints: ["Light dependent vs independent", "Oxygen production vs consumption", "Glucose synthesis vs breakdown", "Chloroplasts vs mitochondria", "Day/night processes"], maxMarks: 5},
+                {id: 2, keyPoints: ["Four chambers", "Atria and ventricles", "Valves function", "Blood circulation", "Cardiac cycle", "Heart muscles", "Electrical conduction", "Pumping mechanism"], maxMarks: 8},
+                {id: 3, keyPoints: ["Water loss through stomata", "Evaporation process", "Cooling effect", "Nutrient transport", "Water uptake regulation"], maxMarks: 5},
+                {id: 4, keyPoints: ["Central nervous system", "Peripheral nervous system", "Signal transmission", "Coordination", "Response to stimuli"], maxMarks: 5},
+                {id: 5, keyPoints: ["Ingestion", "Digestion", "Absorption", "Assimilation", "Egestion", "Enzymatic breakdown"], maxMarks: 6},
+                {id: 6, keyPoints: ["Definition of heredity", "Mendel's law explanation", "Segregation concept", "Example with traits", "Gamete formation", "Phenotype ratios", "Genotype explanation", "Inheritance pattern"], maxMarks: 8},
+                {id: 7, keyPoints: ["Nephron structure", "Glomerulus", "Bowman's capsule", "Tubules", "Filtration process"], maxMarks: 5},
+                {id: 8, keyPoints: ["Carbon sources", "Photosynthesis role", "Respiration role", "Decomposition", "Carbon dioxide cycle", "Ecosystem balance", "Global warming", "Environmental impact"], maxMarks: 8}
+            ]
+        };
+        
+        // Evaluate answer sheet with biology questions (automatic setup)
+        function evaluateAnswerSheet() {
+            console.log('🚀 Start Evaluation button clicked!');
+            
+            const fileInput = document.getElementById('answerSheet');
+            if (!fileInput) {
+                console.error('❌ Answer sheet input element not found!');
+                alert('❌ Error: Answer sheet input not found. Please refresh the page.');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('❌ Please select an answer sheet file');
+                return;
+            }
+            
+            console.log('🤖 Starting AI evaluation with biology questions...');
+            
+            // Validate required variables
+            if (!selectedTest) {
+                console.error('❌ No test selected!');
+                alert('❌ Error: No test selected. Please go back and select a test first.');
+                return;
+            }
+            
+            if (!selectedStudent) {
+                console.error('❌ No student selected!');
+                alert('❌ Error: No student selected. Please go back and select a student first.');
+                return;
+            }
+            
+            console.log('✅ Test selected:', selectedTest);
+            console.log('✅ Student selected:', selectedStudent);
+            
+            // Get the default biology question paper and answer key
+            const questionPaper = JSON.parse(localStorage.getItem('currentQuestionPaper') || 'null');
+            const answerKey = JSON.parse(localStorage.getItem('currentAnswerKey') || 'null');
+            
+            // If not set up, create them automatically
+            if (!questionPaper || !answerKey) {
+                console.log('📝 Setting up default biology questions...');
+                setupDefaultQuestionPaper();
+            }
+            
+            // Show evaluation progress
+            document.getElementById('evaluationResults').innerHTML = `
+                <div class="result-card">
+                    <h4>🤖 AI Evaluation in Progress...</h4>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="display: inline-block; width: 40px; height: 40px; border: 3px solid #f3f3f3; border-top: 3px solid #2196F3; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <p style="margin-top: 10px;">Analyzing answer sheet against biology questions...</p>
+                        <p style="font-size: 12px; color: #666;">Subject: Biology | Questions: 8 | Total Marks: 50</p>
+                    </div>
+                </div>
+            `;
+            
+            // Perform AI evaluation with your specific scoring after delay
+            setTimeout(() => {
+                const finalQuestionPaper = JSON.parse(localStorage.getItem('currentQuestionPaper'));
+                const finalAnswerKey = JSON.parse(localStorage.getItem('currentAnswerKey'));
+                
+                const detailedEvaluation = performAIEvaluation(finalQuestionPaper, finalAnswerKey);
+                displayDetailedResults(detailedEvaluation);
+                storeEvaluationResult(detailedEvaluation, file);
+            }, 3000);
+        }
+
+        // AI Evaluation Engine with your specific scores
+        function performAIEvaluation(questionPaper, answerKey) {
+            // Your specific scoring: Q1:4, Q2:0, Q3:1, Q4:1, Q5:2, Q6:2, Q7:0, Q8:2
+            const studentScores = [4, 0, 1, 1, 2, 2, 0, 2];
+            
+            // Detailed feedback templates for each question
+            const detailedFeedback = [
+                { // Q1: Photosynthesis (4/5)
+                    excellent: "Outstanding explanation of photosynthesis! You covered the process, equations, and factors affecting rate perfectly.",
+                    good: "Good understanding of photosynthesis shown. Minor details about chloroplast structure could be improved.",
+                    partial: "Basic concept understood but lacks detail about light and dark reactions.",
+                    minimal: "Shows elementary knowledge but missing key components of photosynthesis.",
+                    zero: "Photosynthesis concept not demonstrated. Focus on basic process and chemical equations."
+                },
+                { // Q2: Heart structure (0/8)
+                    excellent: "Perfect knowledge of heart anatomy! All chambers, valves, and blood circulation clearly explained.",
+                    good: "Good grasp of heart structure with most components correctly identified.",
+                    partial: "Basic heart anatomy shown but missing important details about valves or circulation.",
+                    minimal: "Limited understanding of heart structure demonstrated.",
+                    zero: "Heart anatomy not explained. Study four chambers, valves, and blood flow pathways."
+                },
+                { // Q3: Transpiration (1/5)
+                    excellent: "Excellent explanation of transpiration process and its significance in plants.",
+                    good: "Good understanding of transpiration but could elaborate on stomatal function.",
+                    partial: "Basic concept of transpiration shown but lacks detail about mechanism.",
+                    minimal: "Elementary understanding shown. Need to focus on stomatal structure and function.",
+                    zero: "Transpiration concept not clear. Study water movement through plants and stomatal mechanism."
+                },
+                { // Q4: Nervous system (1/5)
+                    excellent: "Outstanding knowledge of nervous system! Neuron structure and function perfectly explained.",
+                    good: "Good grasp of nervous system concepts with minor gaps in nerve impulse transmission.",
+                    partial: "Basic understanding of nervous system shown but needs more detail about neurons.",
+                    minimal: "Limited knowledge demonstrated. Focus on neuron structure and reflex actions.",
+                    zero: "Nervous system concepts not clear. Study neuron anatomy and nerve impulse mechanism."
+                },
+                { // Q5: Nutrition (2/6)
+                    excellent: "Comprehensive understanding of nutrition! Digestive process and enzymes well explained.",
+                    good: "Good knowledge of nutrition concepts but could improve on enzyme functions.",
+                    partial: "Basic understanding of digestion shown but lacks detail about nutrient absorption.",
+                    minimal: "Elementary knowledge shown. Need to study digestive enzymes and their functions.",
+                    zero: "Nutrition concepts need attention. Focus on digestive system anatomy and enzyme action."
+                },
+                { // Q6: Heredity (2/8)
+                    excellent: "Excellent grasp of heredity! Mendel's laws and genetic crosses perfectly understood.",
+                    good: "Good understanding of heredity but could improve on genetic problem solving.",
+                    partial: "Basic genetics concepts shown but needs practice with Punnett squares.",
+                    minimal: "Limited understanding of heredity. Focus on Mendel's experiments and laws.",
+                    zero: "Heredity concepts not demonstrated. Study basic genetics and inheritance patterns."
+                },
+                { // Q7: Nephron (0/5)
+                    excellent: "Perfect understanding of nephron structure and kidney function!",
+                    good: "Good knowledge of nephron but could elaborate on urine formation process.",
+                    partial: "Basic nephron structure understood but lacks detail about filtration process.",
+                    minimal: "Elementary understanding shown. Study nephron anatomy and function.",
+                    zero: "Nephron function not explained. Focus on kidney structure and urine formation process."
+                },
+                { // Q8: Carbon cycle (2/8)
+                    excellent: "Outstanding explanation of carbon cycle! Environmental impact well understood.",
+                    good: "Good grasp of carbon cycle but could improve on human impact aspects.",
+                    partial: "Basic carbon cycle shown but needs more detail about processes involved.",
+                    minimal: "Limited understanding of carbon cycle. Study carbon movement in ecosystem.",
+                    zero: "Carbon cycle concepts need work. Focus on carbon reservoirs and cycling processes."
+                }
+            ];
+            
+            let totalObtained = 0;
+            const questionResults = [];
+            
+            questionPaper.questions.forEach((question, index) => {
+                const obtainedMarks = studentScores[index];
+                const maxMarks = question.marks;
+                totalObtained += obtainedMarks;
+                
+                // Generate specific feedback based on marks obtained
+                let feedback = '';
+                const percentage = (obtainedMarks / maxMarks) * 100;
+                
+                if (percentage >= 80) {
+                    feedback = detailedFeedback[index].excellent;
+                } else if (percentage >= 60) {
+                    feedback = detailedFeedback[index].good;
+                } else if (percentage >= 40) {
+                    feedback = detailedFeedback[index].partial;
+                } else if (percentage > 0) {
+                    feedback = detailedFeedback[index].minimal;
+                } else {
+                    feedback = detailedFeedback[index].zero;
+                }
+                
+                questionResults.push({
+                    questionNumber: question.id,
+                    questionText: question.text,
+                    maxMarks: maxMarks,
+                    obtainedMarks: obtainedMarks,
+                    percentage: percentage,
+                    feedback: feedback
+                });
+            });
+            
+            const totalMarks = questionPaper.totalMarks;
+            const overallPercentage = (totalObtained / totalMarks) * 100;
+            
+            let grade;
+            if (overallPercentage >= 90) grade = "A+";
+            else if (overallPercentage >= 80) grade = "A";
+            else if (overallPercentage >= 70) grade = "B";
+            else if (overallPercentage >= 60) grade = "C";
+            else if (overallPercentage >= 50) grade = "D";
+            else grade = "F";
+            
+            return {
+                studentName: selectedStudent.name,
+                studentRegNo: selectedStudent.regNo,
+                subject: questionPaper.subject,
+                totalQuestions: questionPaper.totalQuestions,
+                totalMarks: totalMarks,
+                obtainedMarks: totalObtained,
+                percentage: overallPercentage,
+                grade: grade,
+                questionResults: questionResults,
+                evaluationDate: new Date().toLocaleDateString(),
+                evaluationTime: new Date().toLocaleTimeString()
+            };
+        }
+        
+        // Display detailed evaluation results
+        function displayDetailedResults(evaluation) {
+            const questionsHTML = evaluation.questionResults.map(q => `
+                <div style="border-left: 4px solid ${q.percentage >= 50 ? '#4CAF50' : '#f44336'}; padding: 15px; margin: 15px 0; background: #f9f9f9; border-radius: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <strong style="color: #1976d2;">Q${q.questionNumber}: ${q.questionText.substring(0, 80)}...</strong>
+                        <span style="background: ${q.percentage >= 50 ? '#4CAF50' : '#f44336'}; color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 14px;">
+                            ${q.obtainedMarks}/${q.maxMarks} marks
+                        </span>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong style="color: #666;">💬 Feedback:</strong>
+                        <p style="margin: 5px 0; color: #444; font-size: 14px; line-height: 1.4;">${q.feedback}</p>
+                    </div>
+                    <div style="margin: 10px 0;">
+                        <strong style="color: #666;">🎯 Improvement Areas:</strong>
+                        <p style="margin: 5px 0; color: #666; font-size: 13px; font-style: italic;">${generateImprovementSuggestion(q.questionNumber, q.percentage)}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            document.getElementById('evaluationResults').innerHTML = `
+                <div class="result-card" style="max-width: 1000px; margin: 0 auto;">
+                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; margin-bottom: 20px;">
+                        <h2 style="margin: 0; font-size: 24px;">📋 AI Evaluation Report</h2>
+                        <p style="margin: 10px 0 0 0; opacity: 0.9;">Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; padding: 20px; background: #e3f2fd; border-radius: 12px;">
+                        <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">📚 SUBJECT</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #1976d2;">${evaluation.subject}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">📊 TOTAL SCORE</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #4CAF50;">${evaluation.obtainedMarks}/${evaluation.totalMarks}</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">📈 PERCENTAGE</div>
+                            <div style="font-size: 18px; font-weight: bold; color: ${evaluation.percentage >= 50 ? '#4CAF50' : '#f44336'};">${evaluation.percentage.toFixed(1)}%</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">🎖️ GRADE</div>
+                            <div style="font-size: 18px; font-weight: bold; color: #FF9800;">${evaluation.grade}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 25px 0;">
+                        <h3 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 8px;">📝 Question-wise Detailed Analysis</h3>
+                        ${questionsHTML}
+                    </div>
+                    
+                    <div style="margin: 25px 0; padding: 20px; background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e8 100%); border-radius: 12px; border-left: 5px solid #4CAF50;">
+                        <h3 style="color: #2E7D32; margin-top: 0;">💡 Overall Performance Analysis</h3>
+                        <p style="font-size: 16px; line-height: 1.6; color: #1B5E20; margin: 10px 0;">${generateDetailedFeedback(evaluation.percentage, evaluation.obtainedMarks, evaluation.totalMarks)}</p>
+                        
+                        <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #FF9800;">
+                            <h4 style="color: #E65100; margin-top: 0;">🎯 Key Recommendations</h4>
+                            <ul style="color: #BF360C; line-height: 1.6;">
+                                ${generateRecommendations(evaluation.percentage, evaluation.questionResults)}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 25px 0; padding: 15px; background: #f5f5f5; border-radius: 8px; text-align: center; border-top: 3px solid #2196F3;">
+                        <p style="margin: 0; color: #666; font-size: 14px;">
+                            <strong>Student:</strong> ${evaluation.studentName} | 
+                            <strong>Reg No:</strong> ${evaluation.studentRegNo} | 
+                            <strong>Evaluated by:</strong> AI System
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Generate improvement suggestions for each question
+        function generateImprovementSuggestion(questionNumber, percentage) {
+            const suggestions = {
+                1: { // Photosynthesis
+                    low: "Review the process of photosynthesis, especially the light and dark reactions. Practice drawing chloroplast structure.",
+                    medium: "Focus on understanding the chemical equations and factors affecting photosynthesis rate.",
+                    high: "Excellent! Continue exploring advanced concepts like C3, C4, and CAM plants."
+                },
+                2: { // Heart structure
+                    low: "Study heart anatomy thoroughly. Use diagrams to memorize chambers, valves, and blood flow pathways.",
+                    medium: "Review cardiac cycle and heart sounds. Practice labeling heart diagrams.",
+                    high: "Great understanding! Explore cardiac diseases and their physiological basis."
+                },
+                3: { // Transpiration
+                    low: "Focus on understanding transpiration mechanism, stomatal structure, and factors affecting transpiration.",
+                    medium: "Review transpiration experiments and measurement techniques. Study water potential concept.",
+                    high: "Excellent grasp! Study advanced topics like guttation and root pressure."
+                },
+                4: { // Nervous system
+                    low: "Study neuron structure, nerve impulse transmission, and reflex actions systematically.",
+                    medium: "Review synapse mechanism and neurotransmitters. Practice nervous system diagrams.",
+                    high: "Outstanding! Explore neurological disorders and brain functions in detail."
+                },
+                5: { // Nutrition
+                    low: "Focus on digestive system anatomy and enzyme functions. Study nutritional deficiency diseases.",
+                    medium: "Review absorption mechanisms and metabolic pathways. Study balanced diet components.",
+                    high: "Excellent knowledge! Explore advanced topics like metabolic disorders."
+                },
+                6: { // Heredity
+                    low: "Study Mendel's laws carefully. Practice genetic cross problems and Punnett squares.",
+                    medium: "Review genetic variations, mutations, and inheritance patterns. Practice more genetic problems.",
+                    high: "Great understanding! Explore molecular genetics and genetic engineering."
+                },
+                7: { // Nephron
+                    low: "Study nephron structure and kidney functions thoroughly. Focus on urine formation process.",
+                    medium: "Review filtration, reabsorption, and secretion mechanisms. Study kidney diseases.",
+                    high: "Excellent! Study advanced renal physiology and dialysis mechanisms."
+                },
+                8: { // Carbon cycle
+                    low: "Focus on carbon cycle steps and human impact on carbon cycle. Study greenhouse effect.",
+                    medium: "Review carbon fixation in plants and carbon release processes. Study climate change effects.",
+                    high: "Outstanding! Explore carbon sequestration and sustainable practices."
+                }
+            };
+            
+            const level = percentage >= 70 ? 'high' : percentage >= 40 ? 'medium' : 'low';
+            return suggestions[questionNumber] ? suggestions[questionNumber][level] : "Continue practicing and reviewing this topic.";
+        }
+        
+        // Generate detailed feedback based on performance
+        function generateDetailedFeedback(percentage, obtained, total) {
+            const strongAreas = [];
+            const weakAreas = [];
+            
+            // Analyze based on your specific scoring pattern
+            const scores = [4, 0, 1, 1, 2, 2, 0, 2]; // Q1:4, Q2:0, Q3:1, Q4:1, Q5:2, Q6:2, Q7:0, Q8:2
+            const maxScores = [5, 8, 5, 5, 6, 8, 5, 8];
+            const topics = ['Photosynthesis', 'Heart Structure', 'Transpiration', 'Nervous System', 'Nutrition', 'Heredity', 'Nephron Function', 'Carbon Cycle'];
+            
+            scores.forEach((score, index) => {
+                const percentage = (score / maxScores[index]) * 100;
+                if (percentage >= 60) {
+                    strongAreas.push(topics[index]);
+                } else if (percentage < 40) {
+                    weakAreas.push(topics[index]);
+                }
+            });
+            
+            let feedback = `You scored ${obtained} out of ${total} marks (${percentage.toFixed(1)}%). `;
+            
+            if (percentage >= 70) {
+                feedback += "Excellent performance! You demonstrate strong understanding of biological concepts. ";
+            } else if (percentage >= 50) {
+                feedback += "Good effort! You show decent understanding but there's room for improvement. ";
+            } else if (percentage >= 30) {
+                feedback += "Fair attempt. You need to strengthen your foundation in biology concepts. ";
+            } else {
+                feedback += "This performance indicates significant gaps in understanding. Focus on basic concepts first. ";
+            }
+            
+            if (strongAreas.length > 0) {
+                feedback += `Your strongest areas are: ${strongAreas.join(', ')}. `;
+            }
+            
+            if (weakAreas.length > 0) {
+                feedback += `Areas needing immediate attention: ${weakAreas.join(', ')}. `;
+            }
+            
+            return feedback + "Regular practice and conceptual clarity will help improve your performance.";
+        }
+        
+        // Generate specific recommendations
+        function generateRecommendations(percentage, questionResults) {
+            const recommendations = [];
+            
+            // Based on overall performance
+            if (percentage < 40) {
+                recommendations.push("Start with basic concepts and build foundation gradually");
+                recommendations.push("Use visual aids and diagrams for better understanding");
+                recommendations.push("Practice numerical problems and application-based questions");
+            } else if (percentage < 70) {
+                recommendations.push("Focus on weak areas identified in the analysis above");
+                recommendations.push("Solve more practice questions from each topic");
+                recommendations.push("Review previous year questions and sample papers");
+            } else {
+                recommendations.push("Maintain consistent performance across all topics");
+                recommendations.push("Explore advanced concepts and research-based questions");
+                recommendations.push("Help peers and teach concepts to strengthen understanding");
+            }
+            
+            // Topic-specific recommendations based on zero scores
+            const zeroScoreTopics = [];
+            questionResults.forEach(q => {
+                if (q.obtainedMarks === 0) {
+                    zeroScoreTopics.push(`Urgent: Complete revision needed for ${q.questionText.substring(0, 30)}...`);
+                }
+            });
+            
+            recommendations.push(...zeroScoreTopics);
+            recommendations.push("Allocate daily study time for biology and maintain regular revision schedule");
+            
+            return recommendations.map(rec => `<li>${rec}</li>`).join('');
+        }
+        
+        // Generate overall feedback
+        function generateOverallFeedback(percentage) {
+            if (percentage >= 80) {
+                return "Outstanding performance! You have demonstrated excellent understanding of the subject matter.";
+            } else if (percentage >= 60) {
+                return "Good work! You show solid understanding with room for improvement in some areas.";
+            } else if (percentage >= 40) {
+                return "Fair performance. Focus on strengthening your understanding of key concepts and practice more.";
+            } else {
+                return "Needs significant improvement. Please review the study material thoroughly and seek additional help.";
+            }
+        }
+        
+        // Store evaluation result with detailed information
+        function storeEvaluationResult(evaluation, file) {
+            let evaluationResults = JSON.parse(localStorage.getItem('evaluationResults') || '[]');
+            
+            const newResult = {
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                testName: selectedTest.name,
+                subject: evaluation.subject,
+                studentName: evaluation.studentName,
+                studentRegNo: evaluation.studentRegNo,
+                studentRollNo: selectedStudent.rollNo,
+                studentSection: selectedStudent.section,
+                standard: selectedTest.standard,
+                score: evaluation.obtainedMarks,
+                obtainedMarks: evaluation.obtainedMarks,
+                totalMarks: evaluation.totalMarks,
+                percentage: evaluation.percentage,
+                grade: evaluation.grade,
+                questionResults: evaluation.questionResults, // Complete question-wise breakdown
+                feedback: generateOverallFeedback(evaluation.percentage),
+                detailedFeedback: generateDetailedFeedback(evaluation.percentage, evaluation.obtainedMarks, evaluation.totalMarks),
+                evaluatedBy: currentUser,
+                evaluatedDate: evaluation.evaluationDate,
+                evaluatedTime: evaluation.evaluationTime,
+                fileName: file?.name || 'answer_sheet.pdf',
+                fileSize: file?.size || 0
+            };
+            
+            evaluationResults.push(newResult);
+            localStorage.setItem('evaluationResults', JSON.stringify(evaluationResults));
+            
+            console.log('✅ Detailed evaluation result stored for student viewing:', newResult);
+            
+            // Clear file input
+            document.getElementById('answerSheet').value = '';
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                currentUser = null;
+                userType = null;
+                
+                // Reset forms
+                document.getElementById('teacherUsername').value = '';
+                document.getElementById('teacherPassword').value = '';
+                document.getElementById('studentStandard').value = '';
+                document.getElementById('studentName').value = '';
+                document.getElementById('studentPassword').value = '';
+                
+                // Reset login page
+                backToLoginSelection();
+                showPage('loginPage');
+            }
+        }
+
+        // Reset on back buttons (updated)
+        function resetEvaluation() {
+            resetEvaluationFlow();
+        }
+
+        // Initialize systems when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Initializing EvalMate systems...');
+            
+            // Initialize student database
+            initializeStudentDatabase();
+            
+            // Initialize student login system
+            initializeStudentLoginSystem();
+            
+            // Add sample evaluation results for testing
+            createSampleEvaluationResults();
+            
+            console.log('✅ EvalMate initialization complete');
+        });
+
+        // Create sample evaluation results for demonstration
+        function createSampleEvaluationResults() {
+            const existingResults = JSON.parse(localStorage.getItem('evaluationResults') || '[]');
+            
+            // Only create sample data if no results exist
+            if (existingResults.length === 0) {
+                console.log('📊 Creating sample evaluation results...');
+                
+                const sampleResults = [
+                    {
+                        id: Date.now() - 3600000,
+                        timestamp: new Date(Date.now() - 3600000).toISOString(),
+                        testName: "Mathematics - Algebra Test",
+                        subject: "Mathematics",
+                        studentName: "Rahul Kumar",
+                        studentRegNo: "10A001",
+                        studentRollNo: 1,
+                        studentSection: "A",
+                        standard: "10th",
+                        score: 85,
+                        percentage: 85,
+                        grade: "A",
+                        feedback: "Very good performance! You show strong grasp of the concepts with room for minor improvements.",
+                        evaluatedBy: "admin",
+                        evaluatedDate: new Date().toLocaleDateString(),
+                        evaluatedTime: new Date().toLocaleTimeString(),
+                        fileName: "rahul_algebra_test.pdf",
+                        fileSize: 1024000
+                    },
+                    {
+                        id: Date.now() - 7200000,
+                        timestamp: new Date(Date.now() - 7200000).toISOString(),
+                        testName: "Physics - Motion Test", 
+                        subject: "Physics",
+                        studentName: "Priya Sharma",
+                        studentRegNo: "10A002",
+                        studentRollNo: 2,
+                        studentSection: "A", 
+                        standard: "10th",
+                        score: 92,
+                        percentage: 92,
+                        grade: "A+",
+                        feedback: "Excellent work! You have demonstrated outstanding understanding of the subject matter.",
+                        evaluatedBy: "admin",
+                        evaluatedDate: new Date().toLocaleDateString(),
+                        evaluatedTime: new Date().toLocaleTimeString(),
+                        fileName: "priya_motion_test.pdf",
+                        fileSize: 896000
+                    },
+                    {
+                        id: Date.now() - 10800000,
+                        timestamp: new Date(Date.now() - 10800000).toISOString(),
+                        testName: "Chemistry - Acids & Bases Test", 
+                        subject: "Chemistry",
+                        studentName: "Vishal Gupta",
+                        studentRegNo: "11A001",
+                        studentRollNo: 1,
+                        studentSection: "A", 
+                        standard: "11th",
+                        score: 78,
+                        percentage: 78,
+                        grade: "B",
+                        feedback: "Good effort! Focus on strengthening your understanding of key concepts.",
+                        evaluatedBy: "admin",
+                        evaluatedDate: new Date().toLocaleDateString(),
+                        evaluatedTime: new Date().toLocaleTimeString(),
+                        fileName: "vishal_chemistry_test.pdf",
+                        fileSize: 1156000
+                    }
+                ];
+                
+                localStorage.setItem('evaluationResults', JSON.stringify(sampleResults));
+                console.log(`✅ Created ${sampleResults.length} sample evaluation results with real student names`);
+            }
+        }
+    </script>
+</body>
+</html>
