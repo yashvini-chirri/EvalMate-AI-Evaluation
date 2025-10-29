@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # EvalMate - AI-Powered Answer Sheet Evaluation System
 
 <div align="center">
@@ -200,3 +201,7 @@ EvalMate/
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+=======
+# EvalMate-AI-Evaluation
+ AI-Powered Answer Sheet Evaluation System using LangGraph workflow for intelligent educational assessment
+>>>>>>> 2dc51a2fc6727fe7bc5defd23e0ce3f8cc444497
