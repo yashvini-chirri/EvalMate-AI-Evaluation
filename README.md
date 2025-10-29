@@ -11,7 +11,7 @@
 
 **🤖 Intelligent Answer Sheet Evaluation using AI Agents and LangGraph Workflow**
 
-[Demo](http://localhost:8000/demo.html) • [Documentation](http://localhost:8000/docs) • [Features](#features) • [Installation](#installation)
+- [Demo](https://github.com/yashvini-chirri/EvalMate-AI-Evaluation) • [Documentation](http://localhost:8000/docs) • [Features](#features) • [Installation](#installation)
 
 </div>
 
@@ -85,8 +85,8 @@ EvalMate is an advanced AI-powered answer sheet evaluation system that automates
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/evalmate.git
-cd evalmate
+git clone https://github.com/yashvini-chirri/EvalMate-AI-Evaluation.git
+cd EvalMate-AI-Evaluation
 ```
 
 ### 2. Set Up Virtual Environment
