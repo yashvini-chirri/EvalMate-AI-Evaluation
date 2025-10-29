@@ -1,0 +1,13 @@
+## Advanced OCR Evaluation System - Test Content
+
+**Question 1:** What is photosynthesis?
+**Answer 1:** Photosynthesis is the process by which plants convert sunlight into energy using chlorophyll.
+
+**Question 2:** 
+**Answer 2:** [Empty - Question skipped]
+
+**Question 3:** Explain democracy.
+**Answer 3:** Democracy is a form of government where people have the power to choose their leaders through voting.
+
+---
+Test document for OCR text extraction and semantic evaluation.

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvalMate - AI-Powered Evaluation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .content {
+            padding: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 EvalMate AI-Powered Evaluation</h1>
+            <p>Complete AI rebuild with intelligent text extraction and evaluation</p>
+        </div>
+        
+        <div class="content">
+            <h3>🎯 AI Evaluation Demo</h3>
+            <p>Test the AI-powered evaluation system:</p>
+            
+            <div class="form-group">
+                <label for="studentAnswer1">Student Answer (Question 1):</label>
+                <textarea id="studentAnswer1" rows="3" placeholder="Enter student's answer for question 1...">Plants make food from sunlight through photosynthesis using chlorophyll</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="modelAnswer1">Expected Answer (Question 1):</label>
+                <textarea id="modelAnswer1" rows="3" placeholder="Enter expected answer...">Plants produce food through photosynthesis using sunlight</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="marks1">Maximum Marks (Question 1):</label>
+                <input type="number" id="marks1" value="5" min="1" max="10">
+            </div>
+            
+            <div class="form-group">
+                <label for="studentAnswer2">Student Answer (Question 2):</label>
+                <textarea id="studentAnswer2" rows="3" placeholder="Enter student's answer for question 2...">Water boils at 100 degrees Celsius</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="modelAnswer2">Expected Answer (Question 2):</label>
+                <textarea id="modelAnswer2" rows="3" placeholder="Enter expected answer...">Water boils at 100°C at sea level</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="marks2">Maximum Marks (Question 2):</label>
+                <input type="number" id="marks2" value="3" min="1" max="10">
+            </div>
+            
+            <button onclick="evaluateAnswers()">🤖 Run AI Evaluation</button>
+            <button onclick="clearForm()">🗑️ Clear Form</button>
+            
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        async function evaluateAnswers() {
+            const studentAnswers = {
+                "1": document.getElementById('studentAnswer1').value,
+                "2": document.getElementById('studentAnswer2').value
+            };
+            
+            const answerKey = {
+                "1": document.getElementById('modelAnswer1').value,
+                "2": document.getElementById('modelAnswer2').value
+            };
+            
+            const questionMarks = {
+                "1": document.getElementById('marks1').value,
+                "2": document.getElementById('marks2').value
+            };
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <h4>🤖 AI-Powered Evaluation in Progress</h4>
+                    <p>AI agents are analyzing the answers...</p>
+                </div>
+            `;
+            
+            try {
+                const formData = new FormData();
+                formData.append('student_answers', JSON.stringify(studentAnswers));
+                formData.append('answer_key', JSON.stringify(answerKey));
+                formData.append('question_marks', JSON.stringify(questionMarks));
+                
+                const response = await fetch('/api/advanced/evaluate-semantic', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                let html = `
+                    <h4>🎯 AI Evaluation Results</h4>
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h5>📊 Overall Performance</h5>
+                        <p><strong>Total Score:</strong> ${result.obtained_marks}/${result.total_marks} (${result.percentage}%)</p>
+                        <p><strong>Grade:</strong> ${result.grade}</p>
+                        <p><strong>AI Workflow:</strong> ${result.processing_info?.workflow_type || 'AI-Powered LangGraph'}</p>
+                        <p><strong>Processing Time:</strong> ${result.processing_info?.processing_time_seconds || 'N/A'}s</p>
+                    </div>
+                `;
+                
+                if (result.detailed_results) {
+                    html += `<h5>📝 Detailed AI Analysis</h5>`;
+                    
+                    result.detailed_results.forEach((evaluation, index) => {
+                        const percentage = Math.round((evaluation.marks_obtained / evaluation.marks_allocated) * 100);
+                        const statusIcon = evaluation.status === 'skipped' ? '❌' : 
+                                          percentage >= 80 ? '✅' : 
+                                          percentage >= 60 ? '⚠️' : '🔴';
+                        
+                        html += `
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 8px;">
+                                <h6>${statusIcon} Question ${evaluation.question_id}: ${evaluation.marks_obtained}/${evaluation.marks_allocated} marks (${percentage}%)</h6>
+                                
+                                ${evaluation.status === 'skipped' ? 
+                                    `<p style="color: #856404; background: #fff3cd; padding: 8px; border-radius: 4px;">
+                                        ⚠️ Question not attempted
+                                    </p>` :
+                                    `
+                                    <p><strong>Student Answer:</strong> "${evaluation.student_answer}"</p>
+                                    <p><strong>Expected Answer:</strong> "${evaluation.model_answer}"</p>
+                                    
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+                                        <div>
+                                            <p><strong>Conceptual Understanding:</strong> ${Math.round((evaluation.conceptual_understanding || 0) * 100)}%</p>
+                                            <p><strong>Factual Accuracy:</strong> ${Math.round((evaluation.factual_accuracy || 0) * 100)}%</p>
+                                        </div>
+                                        <div>
+                                            <p><strong>Completeness:</strong> ${Math.round((evaluation.completeness || 0) * 100)}%</p>
+                                            <p><strong>Clarity:</strong> ${Math.round((evaluation.clarity_expression || 0) * 100)}%</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div style="background: #f1f3f4; padding: 8px; border-radius: 4px; margin: 8px 0;">
+                                        <strong>🤖 AI Feedback:</strong> ${evaluation.feedback}
+                                    </div>
+                                    
+                                    ${evaluation.strengths && evaluation.strengths.length > 0 ? 
+                                        `<p><strong>✅ Strengths:</strong> ${evaluation.strengths.join(', ')}</p>` : ''}
+                                    ${evaluation.weaknesses && evaluation.weaknesses.length > 0 ? 
+                                        `<p><strong>⚠️ Areas for Improvement:</strong> ${evaluation.weaknesses.join(', ')}</p>` : ''}
+                                    `
+                                }
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += `
+                    <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+                        <strong>🎯 AI Processing Summary:</strong>
+                        <br>• Evaluation completed at: ${new Date().toLocaleString()}
+                        <br>• AI models used for intelligent evaluation
+                        <br>• No cached data - fresh analysis only
+                        <br>• Processing time: ${result.processing_info?.processing_time_seconds || 'N/A'}s
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div style="color: red; padding: 15px; background: #f8d7da; border-radius: 8px;">
+                        <h4>❌ Error</h4>
+                        <p>Failed to evaluate answers: ${error.message}</p>
+                        <p>Please check that the server is running and try again.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function clearForm() {
+            document.getElementById('studentAnswer1').value = '';
+            document.getElementById('modelAnswer1').value = '';
+            document.getElementById('marks1').value = '5';
+            document.getElementById('studentAnswer2').value = '';
+            document.getElementById('modelAnswer2').value = '';
+            document.getElementById('marks2').value = '3';
+            document.getElementById('results').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

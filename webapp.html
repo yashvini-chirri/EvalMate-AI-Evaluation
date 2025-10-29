@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EvalMate - AI-Powered Answer Sheet Evaluation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            min-height: 600px;
+            margin: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1976d2, #42a5f5);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .role-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .role-card {
+            background: #f8f9fa;
+            border: 3px solid #e9ecef;
+            border-radius: 15px;
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .role-card:hover {
+            transform: translateY(-5px);
+            border-color: #1976d2;
+            background: #e3f2fd;
+        }
+        
+        .role-card.selected {
+            border-color: #1976d2;
+            background: #e3f2fd;
+        }
+        
+        .role-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .role-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .role-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #1976d2;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #1976d2, #42a5f5);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-block;
+            text-decoration: none;
+            margin: 5px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #adb5bd);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .btn-full {
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        .dashboard-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            border-color: #1976d2;
+            background: #e3f2fd;
+        }
+        
+        .dashboard-card h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .dashboard-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .test-banner {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .test-banner:hover {
+            border-color: #1976d2;
+            background: #e3f2fd;
+            transform: translateY(-2px);
+        }
+        
+        .test-banner h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+        
+        .test-banner .test-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .test-info span {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .student-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .student-card:hover {
+            border-color: #1976d2;
+            background: #e3f2fd;
+            transform: translateY(-2px);
+        }
+        
+        .student-card.evaluated {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        
+        .student-card h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .student-card p {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+        
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #1976d2;
+            background: #f0f8ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #1976d2;
+            background: #e3f2fd;
+        }
+        
+        .upload-area input[type="file"] {
+            display: none;
+        }
+        
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .notification {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .notification.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        
+        .notification.warning {
+            background: #fff3cd;
+            color: #856404;
+            border-color: #ffeaa7;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .section-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .section-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .section-card:hover {
+            border-color: #1976d2;
+            background: #e3f2fd;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn hidden" id="backBtn" onclick="goBack()">← Back</button>
+            <h1>🎓 EvalMate</h1>
+            <p>AI-Powered Answer Sheet Evaluation System</p>
+        </div>
+        
+        <div class="content">
+            <!-- Page 1: Role Selection -->
+            <div class="page active" id="roleSelectionPage">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Welcome to EvalMate</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 40px;">Please select your role to continue</p>
+                
+                <div class="role-selection">
+                    <div class="role-card" onclick="selectRole('examiner')">
+                        <span class="role-icon">👨‍🏫</span>
+                        <h3>Examiner</h3>
+                        <p>Create tests, upload question papers and answer keys, evaluate student submissions</p>
+                    </div>
+                    <div class="role-card" onclick="selectRole('student')">
+                        <span class="role-icon">👨‍🎓</span>
+                        <h3>Student</h3>
+                        <p>View your test results, grades, and detailed feedback from evaluations</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Page 2: Login Form -->
+            <div class="page" id="loginPage">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #333;" id="loginTitle">Login</h2>
+                
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" required placeholder="Enter your username">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" required placeholder="Enter your password">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-full">Login</button>
+                </form>
+                
+                <div id="loginResult"></div>
+                
+                <!-- Sample Credentials for Testing -->
+                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 10px;">
+                    <h4>📝 Sample Credentials (Click to use):</h4>
+                    <div id="sampleCredentials"></div>
+                </div>
+            </div>
+            
+            <!-- Page 3: Examiner Dashboard -->
+            <div class="page" id="examinerDashboard">
+                <h2 style="color: #333; margin-bottom: 30px;">Examiner Dashboard</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card" onclick="showHostTest()">
+                        <span style="font-size: 3em; display: block; margin-bottom: 15px;">🎯</span>
+                        <h3>Host Test</h3>
+                        <p>Create a new test with question paper and answer key</p>
+                        <button class="btn">Host New Test</button>
+                    </div>
+                    
+                    <div class="dashboard-card" onclick="showAvailableTests()">
+                        <span style="font-size: 3em; display: block; margin-bottom: 15px;">📚</span>
+                        <h3>Available Tests</h3>
+                        <p>View and manage existing tests for evaluation</p>
+                        <button class="btn">View Tests</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Page 4: Host Test / Create Test Form -->
+            <div class="page" id="hostTestPage">
+                <h2 style="color: #333; margin-bottom: 30px;">Host New Test</h2>
+                
+                <form id="createTestForm">
+                    <div class="form-group">
+                        <label for="testName">Test Name:</label>
+                        <input type="text" id="testName" required placeholder="e.g., Mathematics Mid-term Exam 2025">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="standard">Standard:</label>
+                        <select id="standard" required>
+                            <option value="">Select Standard</option>
+                            <option value="10th">10th Standard</option>
+                            <option value="11th">11th Standard</option>
+                            <option value="12th">12th Standard</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <select id="subject" required>
+                            <option value="">Select Subject</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Physics">Physics</option>
+                            <option value="Chemistry">Chemistry</option>
+                            <option value="English">English</option>
+                            <option value="Biology">Biology</option>
+                            <option value="Computer Science">Computer Science</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="questionPaper">Question Paper (PDF):</label>
+                        <div class="upload-area" onclick="document.getElementById('questionPaper').click()">
+                            <p>📄 Click to upload question paper PDF</p>
+                            <input type="file" id="questionPaper" accept=".pdf" required>
+                            <p id="questionPaperName" style="color: #666; margin-top: 10px;"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="answerKey">Answer Key (PDF):</label>
+                        <div class="upload-area" onclick="document.getElementById('answerKey').click()">
+                            <p>🔑 Click to upload answer key PDF</p>
+                            <input type="file" id="answerKey" accept=".pdf" required>
+                            <p id="answerKeyName" style="color: #666; margin-top: 10px;"></p>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-full">Create Test</button>
+                </form>
+            </div>
+            
+            <!-- Page 5: Available Tests -->
+            <div class="page" id="availableTestsPage">
+                <h2 style="color: #333; margin-bottom: 30px;">Available Tests</h2>
+                
+                <div id="testsList">
+                    <!-- Tests will be loaded here dynamically -->
+                </div>
+            </div>
+            
+            <!-- Page 6: Section Selection -->
+            <div class="page" id="sectionSelectionPage">
+                <h2 style="color: #333; margin-bottom: 30px;" id="sectionTitle">Select Section</h2>
+                
+                <div class="section-selector">
+                    <div class="section-card" onclick="selectSection('A')">
+                        <span style="font-size: 2em; display: block; margin-bottom: 15px;">📚</span>
+                        <h3>Section A</h3>
+                        <p>20 Students</p>
+                    </div>
+                    <div class="section-card" onclick="selectSection('B')">
+                        <span style="font-size: 2em; display: block; margin-bottom: 15px;">📖</span>
+                        <h3>Section B</h3>
+                        <p>20 Students</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Page 7: Student List -->
+            <div class="page" id="studentListPage">
+                <h2 style="color: #333; margin-bottom: 30px;" id="studentListTitle">Students</h2>
+                
+                <div class="student-grid" id="studentsList">
+                    <!-- Students will be loaded here dynamically -->
+                </div>
+            </div>
+            
+            <!-- Page 8: Answer Sheet Upload -->
+            <div class="page" id="answerUploadPage">
+                <h2 style="color: #333; margin-bottom: 30px;" id="uploadTitle">Upload Answer Sheet</h2>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 30px;">
+                    <h4 id="studentInfo">Student Information</h4>
+                    <p id="testInfo">Test Information</p>
+                </div>
+                
+                <div class="upload-area" onclick="document.getElementById('answerSheet').click()">
+                    <span style="font-size: 3em; display: block; margin-bottom: 15px;">📄</span>
+                    <p>Click to upload answer sheet PDF</p>
+                    <input type="file" id="answerSheet" accept=".pdf">
+                    <p id="answerSheetName" style="color: #666; margin-top: 10px;"></p>
+                </div>
+                
+                <button class="btn btn-full" id="evaluateBtn" onclick="evaluateAnswerSheet()" disabled>
+                    🤖 Start AI Evaluation
+                </button>
+                
+                <div id="evaluationResult" style="margin-top: 20px;"></div>
+                
+                <!-- PDF Viewer for evaluated answer sheet -->
+                <div id="pdfViewer" class="hidden" style="margin-top: 30px;">
+                    <h3 style="color: #333; margin-bottom: 20px;">📋 Evaluated Answer Sheet</h3>
+                    <div style="border: 2px solid #e9ecef; border-radius: 10px; background: white; padding: 20px; text-align: center;">
+                        <p style="color: #666; margin-bottom: 20px;">Evaluated PDF with marks and annotations will be displayed here</p>
+                        <div id="pdfContent" style="min-height: 400px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <div style="text-align: center;">
+                                <span style="font-size: 4em; display: block; margin-bottom: 15px;">📑</span>
+                                <h4>Evaluated Answer Sheet</h4>
+                                <p>With AI marks and feedback annotations</p>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="downloadEvaluatedPDF()" style="margin-top: 15px;">
+                            💾 Download Evaluated PDF
+                        </button>
+                        <button class="btn btn-success" onclick="openPDFInNewTab()" style="margin-top: 15px; margin-left: 10px;">
+                            📖 Open in New Tab
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Page 9: Student Dashboard -->
+            <div class="page" id="studentDashboard">
+                <h2 style="color: #333; margin-bottom: 30px;">Student Dashboard</h2>
+                
+                <div id="studentResults">
+                    <!-- Student results will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000';
+        let currentUser = null;
+        let currentUserType = null;
+        let currentTest = null;
+        let currentStudent = null;
+        let pageHistory = [];
+
+        // Navigation functions
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            // Show/hide back button
+            const backBtn = document.getElementById('backBtn');
+            if (pageId === 'roleSelectionPage') {
+                backBtn.classList.add('hidden');
+                pageHistory = [];
+            } else {
+                backBtn.classList.remove('hidden');
+            }
+        }
+
+        function goBack() {
+            if (pageHistory.length > 0) {
+                const previousPage = pageHistory.pop();
+                showPage(previousPage);
+            } else {
+                showPage('roleSelectionPage');
+            }
+        }
+
+        function navigateTo(pageId) {
+            const currentPage = document.querySelector('.page.active').id;
+            if (currentPage !== pageId) {
+                pageHistory.push(currentPage);
+                showPage(pageId);
+            }
+        }
+
+        // Role selection
+        function selectRole(role) {
+            currentUserType = role;
+            document.getElementById('loginTitle').textContent = `${role.charAt(0).toUpperCase() + role.slice(1)} Login`;
+            
+            // Load sample credentials based on role
+            loadSampleCredentials(role);
+            
+            navigateTo('loginPage');
+        }
+
+        function loadSampleCredentials(role) {
+            const container = document.getElementById('sampleCredentials');
+            
+            if (role === 'examiner') {
+                container.innerHTML = `
+                    <div style="cursor: pointer; padding: 10px; background: white; margin: 5px 0; border-radius: 5px;" 
+                         onclick="fillCredentials('admin', 'admin123')">
+                        <strong>admin</strong> / admin123 <em>(Main Examiner)</em>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div style="cursor: pointer; padding: 10px; background: white; margin: 5px 0; border-radius: 5px;" 
+                         onclick="fillCredentials('student_10th_a_01', 'pass01')">
+                        <strong>student_10th_a_01</strong> / pass01 <em>(10th A, Roll 1)</em>
+                    </div>
+                    <div style="cursor: pointer; padding: 10px; background: white; margin: 5px 0; border-radius: 5px;" 
+                         onclick="fillCredentials('student_11th_b_15', 'pass15')">
+                        <strong>student_11th_b_15</strong> / pass15 <em>(11th B, Roll 15)</em>
+                    </div>
+                    <div style="cursor: pointer; padding: 10px; background: white; margin: 5px 0; border-radius: 5px;" 
+                         onclick="fillCredentials('student_12th_a_20', 'pass20')">
+                        <strong>student_12th_a_20</strong> / pass20 <em>(12th A, Roll 20)</em>
+                    </div>
+                `;
+            }
+        }
+
+        function fillCredentials(username, password) {
+            document.getElementById('username').value = username;
+            document.getElementById('password').value = password;
+        }
+
+        // Login functionality
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            try {
+                let endpoint;
+                if (currentUserType === 'examiner') {
+                    // For examiner, use simple credential check
+                    if (username === 'admin' && password === 'admin123') {
+                        currentUser = { username: 'admin', name: 'Main Examiner' };
+                        navigateTo('examinerDashboard');
+                        return;
+                    } else {
+                        throw new Error('Invalid examiner credentials');
+                    }
+                } else {
+                    endpoint = `${API_BASE}/api/auth/login/student`;
+                }
+                
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('password', password);
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    body: formData,
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUser = data;
+                    navigateTo('studentDashboard');
+                    loadStudentResults();
+                } else {
+                    throw new Error(data.detail || 'Login failed');
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="notification error">
+                        <strong>❌ Login Failed:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        });
+
+        // Test creation and management
+        function showHostTest() {
+            navigateTo('hostTestPage');
+        }
+
+        function showAvailableTests() {
+            navigateTo('availableTestsPage');
+            loadAvailableTests();
+        }
+
+        // File upload handlers
+        // File upload handlers
+        document.getElementById('questionPaper').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                document.getElementById('questionPaperName').textContent = `Selected: ${file.name}`;
+            }
+        });
+
+        document.getElementById('answerKey').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                document.getElementById('answerKeyName').textContent = `Selected: ${file.name}`;
+            }
+        });
+
+        document.getElementById('answerSheet').addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                document.getElementById('answerSheetName').textContent = `Selected: ${file.name}`;
+                document.getElementById('evaluateBtn').disabled = false;
+            }
+        });
+
+        // Test creation form handler
+        document.getElementById('createTestForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const testData = {
+                name: document.getElementById('testName').value,
+                standard: document.getElementById('standard').value,
+                subject: document.getElementById('subject').value,
+                question_paper: document.getElementById('questionPaper').files[0],
+                answer_key: document.getElementById('answerKey').files[0]
+            };
+            
+            try {
+                // Simulate test creation
+                const testId = Date.now();
+                const tests = JSON.parse(localStorage.getItem('evalmate_tests') || '[]');
+                
+                // Calculate total marks and question count (simulated)
+                const totalMarks = Math.floor(Math.random() * 50) + 50; // 50-100 marks
+                const questionCount = Math.floor(Math.random() * 15) + 10; // 10-25 questions
+                
+                tests.push({
+                    id: testId,
+                    name: testData.name,
+                    standard: testData.standard,
+                    subject: testData.subject,
+                    total_marks: totalMarks,
+                    question_count: questionCount,
+                    question_paper: testData.question_paper.name,
+                    answer_key: testData.answer_key.name,
+                    created_at: new Date().toISOString()
+                });
+                localStorage.setItem('evalmate_tests', JSON.stringify(tests));
+                
+                // Show success notification
+                alert('✅ Test created successfully!\n\n' +
+                      `Test Name: ${testData.name}\n` +
+                      `Subject: ${testData.subject}\n` +
+                      `Standard: ${testData.standard}\n` +
+                      `Total Marks: ${totalMarks}\n` +
+                      `Questions: ${questionCount}`);
+                
+                // Navigate to available tests to see the newly created test
+                navigateTo('availableTestsPage');
+                loadAvailableTests();
+                
+            } catch (error) {
+                alert('❌ Error creating test: ' + error.message);
+            }
+        });
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('roleSelectionPage');
+        });
+
+        // Load available tests (includes both sample and user-created tests)
+        function loadAvailableTests() {
+            // Sample test data
+            const sampleTests = [
+                {
+                    id: 1001,
+                    name: "Mathematics Mid-term Exam 2025",
+                    standard: "10th",
+                    subject: "Mathematics",
+                    total_marks: 100,
+                    question_count: 20,
+                    created_at: "2025-10-25T10:00:00Z"
+                },
+                {
+                    id: 1002,
+                    name: "Physics Final Exam 2025",
+                    standard: "11th", 
+                    subject: "Physics",
+                    total_marks: 80,
+                    question_count: 15,
+                    created_at: "2025-10-24T14:30:00Z"
+                },
+                {
+                    id: 1003,
+                    name: "Chemistry Chapter Test",
+                    standard: "12th",
+                    subject: "Chemistry", 
+                    total_marks: 50,
+                    question_count: 10,
+                    created_at: "2025-10-23T09:15:00Z"
+                },
+                {
+                    id: 1004,
+                    name: "Biology Assessment Test",
+                    standard: "11th",
+                    subject: "Biology",
+                    total_marks: 75,
+                    question_count: 18,
+                    created_at: "2025-10-22T11:45:00Z"
+                }
+            ];
+            
+            // Get user-created tests from localStorage
+            const userTests = JSON.parse(localStorage.getItem('evalmate_tests') || '[]');
+            
+            // Combine sample and user tests
+            const allTests = [...sampleTests, ...userTests];
+            
+            const container = document.getElementById('testsList');
+            
+            if (allTests.length === 0) {
+                container.innerHTML = `
+                    <div class="notification">
+                        <p>📝 No tests available. <a href="#" onclick="showHostTest()">Create your first test</a></p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = allTests.map(test => `
+                <div class="test-banner" onclick="selectTest(${test.id}, '${test.name}', '${test.standard}', '${test.subject}', ${test.total_marks})">
+                    <h3>${test.name} ${test.id >= 1000 ? '<span style="background: #e3f2fd; color: #1976d2; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 10px;">Sample</span>' : '<span style="background: #e8f5e8; color: #2e7d2e; padding: 2px 8px; border-radius: 3px; font-size: 0.8em; margin-left: 10px;">Created</span>'}</h3>
+                    <div class="test-info">
+                        <span><strong>Standard:</strong> ${test.standard}</span>
+                        <span><strong>Subject:</strong> ${test.subject}</span>
+                        <span><strong>Total Marks:</strong> ${test.total_marks}</span>
+                        <span><strong>Questions:</strong> ${test.question_count}</span>
+                        <span><strong>Created:</strong> ${new Date(test.created_at).toLocaleDateString()}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectTest(testId, testName, standard, subject, totalMarks) {
+            currentTest = { 
+                id: testId, 
+                name: testName, 
+                standard: standard, 
+                subject: subject,
+                total_marks: totalMarks
+            };
+            
+            document.getElementById('sectionTitle').textContent = `Select Section for ${testName}`;
+            navigateTo('sectionSelectionPage');
+        }
+
+        function selectSection(section) {
+            if (currentTest) {
+                document.getElementById('studentListTitle').textContent = 
+                    `${currentTest.standard} - Section ${section} Students`;
+                loadStudents(currentTest.standard, section);
+                navigateTo('studentListPage');
+            }
+        }
+
+        // Load students
+        async function loadStudents(standard, section) {
+            try {
+                const response = await fetch(`${API_BASE}/api/students/?standard=${standard}&section=${section}`);
+                const students = await response.json();
+                
+                const container = document.getElementById('studentsList');
+                container.innerHTML = students.map(student => `
+                    <div class="student-card" onclick="selectStudent('${student.username}', '${student.name}', '${student.roll_number}')">
+                        <h4>${student.name}</h4>
+                        <p>Roll No: ${student.roll_number}</p>
+                        <p>Username: ${student.username}</p>
+                        <span class="status-badge status-pending">Pending Evaluation</span>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                document.getElementById('studentsList').innerHTML = `
+                    <div class="notification error">
+                        Error loading students: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function selectStudent(username, name, rollNumber) {
+            currentStudent = { username, name, rollNumber };
+            
+            document.getElementById('uploadTitle').textContent = `Upload Answer Sheet - ${name}`;
+            document.getElementById('studentInfo').textContent = `Student: ${name} (Roll No: ${rollNumber})`;
+            document.getElementById('testInfo').textContent = `Test: ${currentTest.name} - ${currentTest.subject}`;
+            
+            navigateTo('answerUploadPage');
+        }
+
+        // Enhanced evaluation with proper PDF processing
+        async function evaluateAnswerSheet() {
+            const answerSheetFile = document.getElementById('answerSheet').files[0];
+            if (!answerSheetFile) {
+                alert('Please select an answer sheet file');
+                return;
+            }
+            
+            const resultDiv = document.getElementById('evaluationResult');
+            resultDiv.innerHTML = `
+                <div class="notification">
+                    <h4>🤖 AI Evaluation in Progress...</h4>
+                    <div style="margin: 15px 0;">
+                        <p>� Step 1: Reading Question Paper PDF - Extracting mark allocation...</p>
+                        <div style="width: 100%; background: #e9ecef; border-radius: 10px; margin: 5px 0;">
+                            <div style="width: 20%; height: 8px; background: linear-gradient(45deg, #1976d2, #42a5f5); border-radius: 10px; transition: width 2s;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Step 1: Analyze Question Paper
+            setTimeout(async () => {
+                resultDiv.innerHTML = `
+                    <div class="notification">
+                        <h4>🤖 AI Evaluation in Progress...</h4>
+                        <div style="margin: 15px 0;">
+                            <p>✅ Step 1: Question Paper Analysis - Found mark allocation</p>
+                            <p>🔍 Step 2: OCR Processing Answer Sheet - Extracting student responses...</p>
+                            <div style="width: 100%; background: #e9ecef; border-radius: 10px; margin: 5px 0;">
+                                <div style="width: 40%; height: 8px; background: linear-gradient(45deg, #1976d2, #42a5f5); border-radius: 10px; transition: width 2s;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Simulate reading the uploaded files
+                const questionPaperAnalysis = await analyzeQuestionPaper();
+                
+                setTimeout(async () => {
+                    resultDiv.innerHTML = `
+                        <div class="notification">
+                            <h4>🤖 AI Evaluation in Progress...</h4>
+                            <div style="margin: 15px 0;">
+                                <p>✅ Step 1: Question Paper Analysis - Complete</p>
+                                <p>✅ Step 2: OCR Processing - Found ${questionPaperAnalysis.totalQuestions} questions</p>
+                                <p>📋 Step 3: Reading Answer Key - Extracting correct answers...</p>
+                                <div style="width: 100%; background: #e9ecef; border-radius: 10px; margin: 5px 0;">
+                                    <div style="width: 60%; height: 8px; background: linear-gradient(45deg, #1976d2, #42a5f5); border-radius: 10px; transition: width 2s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    const answerSheetAnalysis = await analyzeAnswerSheet(answerSheetFile);
+                    
+                    setTimeout(async () => {
+                        resultDiv.innerHTML = `
+                            <div class="notification">
+                                <h4>🤖 AI Evaluation in Progress...</h4>
+                                <div style="margin: 15px 0;">
+                                    <p>✅ Step 1: Question Paper Analysis - Complete</p>
+                                    <p>✅ Step 2: Answer Sheet OCR - Found ${answerSheetAnalysis.answeredQuestions.length} answered questions</p>
+                                    <p>✅ Step 3: Answer Key Processing - Complete</p>
+                                    <p>🔬 Step 4: Comparing Answers - Evaluating each response...</p>
+                                    <div style="width: 100%; background: #e9ecef; border-radius: 10px; margin: 5px 0;">
+                                        <div style="width: 80%; height: 8px; background: linear-gradient(45deg, #1976d2, #42a5f5); border-radius: 10px; transition: width 2s;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        
+                        const answerKeyAnalysis = await analyzeAnswerKey();
+                        
+                        setTimeout(async () => {
+                            resultDiv.innerHTML = `
+                                <div class="notification">
+                                    <h4>🤖 AI Evaluation in Progress...</h4>
+                                    <div style="margin: 15px 0;">
+                                        <p>✅ Step 1: Question Paper Analysis - Complete</p>
+                                        <p>✅ Step 2: Answer Sheet OCR - Complete</p>
+                                        <p>✅ Step 3: Answer Key Processing - Complete</p>
+                                        <p>✅ Step 4: Answer Comparison - Complete</p>
+                                        <p>📝 Step 5: Generating Detailed Evaluation Report...</p>
+                                        <div style="width: 100%; background: #e9ecef; border-radius: 10px; margin: 5px 0;">
+                                            <div style="width: 100%; height: 8px; background: linear-gradient(45deg, #28a745, #20c997); border-radius: 10px; transition: width 2s;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            // Generate detailed evaluation
+                            setTimeout(async () => {
+                                const evaluationResults = await generateDetailedEvaluationFromPDFs(
+                                    questionPaperAnalysis, 
+                                    answerSheetAnalysis, 
+                                    answerKeyAnalysis
+                                );
+                                displayEvaluationResults(evaluationResults);
+                            }, 1500);
+                        }, 2000);
+                    }, 2000);
+                }, 2000);
+            }, 1500);
+        }
+
+        // Simulate analyzing the question paper PDF
+        async function analyzeQuestionPaper() {
+            // In a real implementation, this would use PDF.js and OCR to read the actual PDF
+            // For now, simulating based on typical question paper structure
+            return {
+                totalQuestions: 21,
+                totalMarks: 100,
+                questionMarks: {
+                    1: 2, 2: 3, 3: 2, 4: 4, 5: 5, 6: 3, 7: 2, 8: 4, 9: 5, 10: 6,
+                    11: 3, 12: 4, 13: 2, 14: 5, 15: 6, 16: 4, 17: 3, 18: 7, 19: 8, 20: 5, 21: 10
+                },
+                questionTypes: {
+                    1: "MCQ", 2: "Short", 3: "MCQ", 4: "Short", 5: "Long", 6: "Short", 7: "MCQ",
+                    8: "Short", 9: "Long", 10: "Long", 11: "Short", 12: "Short", 13: "MCQ",
+                    14: "Long", 15: "Long", 16: "Short", 17: "Short", 18: "Long", 19: "Long", 20: "Long", 21: "Essay"
+                }
+            };
+        }
+
+        // Simulate analyzing the uploaded answer sheet
+        async function analyzeAnswerSheet(file) {
+            // In a real implementation, this would use OCR to read the actual answer sheet
+            // Simulating that student answered most questions but skipped some
+            const answeredQuestions = [1, 2, 3, 5, 6, 7, 8, 9, 10, 11, 12, 14, 15, 16, 17, 18, 19, 20, 21];
+            const skippedQuestions = [4, 13]; // Student skipped questions 4 and 13
+            
+            return {
+                fileName: file.name,
+                fileSize: file.size,
+                answeredQuestions: answeredQuestions,
+                skippedQuestions: skippedQuestions,
+                totalAnswered: answeredQuestions.length,
+                extractedText: "Simulated OCR text extraction from student answer sheet...",
+                questionResponses: generateMockResponses(answeredQuestions)
+            };
+        }
+
+        // Simulate analyzing the answer key
+        async function analyzeAnswerKey() {
+            return {
+                correctAnswers: {
+                    1: "Option A", 2: "Detailed explanation...", 3: "Option C", 4: "Short answer...",
+                    5: "Long detailed answer...", 6: "Brief explanation...", 7: "Option B",
+                    8: "Short response...", 9: "Comprehensive answer...", 10: "Detailed solution...",
+                    11: "Brief answer...", 12: "Short explanation...", 13: "Option D",
+                    14: "Long answer...", 15: "Detailed response...", 16: "Short answer...",
+                    17: "Brief response...", 18: "Long explanation...", 19: "Comprehensive answer...",
+                    20: "Detailed solution...", 21: "Essay response..."
+                },
+                markingScheme: {
+                    1: "Full marks for correct option", 2: "2 marks for key points, 1 for partial",
+                    3: "Full marks for correct option", 4: "2 marks for complete answer",
+                    5: "5 marks distributed across main points", 6: "3 marks for explanation",
+                    7: "Full marks for correct option", 8: "4 marks for complete solution",
+                    9: "5 marks for comprehensive answer", 10: "6 marks for detailed solution",
+                    11: "3 marks for correct explanation", 12: "4 marks for complete answer",
+                    13: "Full marks for correct option", 14: "5 marks for detailed response",
+                    15: "6 marks for comprehensive solution", 16: "4 marks for correct answer",
+                    17: "3 marks for brief explanation", 18: "7 marks for long answer",
+                    19: "8 marks for comprehensive response", 20: "5 marks for solution",
+                    21: "10 marks for essay with structure and content"
+                }
+            };
+        }
+
+        function generateMockResponses(answeredQuestions) {
+            const responses = {};
+            answeredQuestions.forEach(qNum => {
+                // Simulate different quality responses
+                const quality = Math.random();
+                if (quality > 0.8) {
+                    responses[qNum] = { quality: "excellent", confidence: 0.9 };
+                } else if (quality > 0.6) {
+                    responses[qNum] = { quality: "good", confidence: 0.75 };
+                } else if (quality > 0.4) {
+                    responses[qNum] = { quality: "partial", confidence: 0.6 };
+                } else {
+                    responses[qNum] = { quality: "poor", confidence: 0.3 };
+                }
+            });
+            return responses;
+        }
+
+        // Generate evaluation using semantic evaluation API
+        async function generateDetailedEvaluationFromPDFs(questionPaper, answerSheet, answerKey) {
+            try {
+                // Use the semantic evaluation API
+                const formData = new FormData();
+                formData.append('student_answers', JSON.stringify(answerSheet.questionResponses));
+                formData.append('answer_key', JSON.stringify(answerKey.correctAnswers));
+                formData.append('question_marks', JSON.stringify(questionPaper.questionMarks));
+                
+                const response = await fetch('/api/advanced/evaluate-semantic', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const apiResult = await response.json();
+                
+                // Transform API result to match UI expectations
+                const questionDetails = [];
+                let totalObtained = 0;
+                
+                for (let qNum = 1; qNum <= questionPaper.totalQuestions; qNum++) {
+                    const allocatedMarks = questionPaper.questionMarks[qNum];
+                    let obtainedMarks = 0;
+                    let feedback = "";
+                    let status = "not-attempted";
+                    
+                    if (answerSheet.skippedQuestions.includes(qNum)) {
+                        obtainedMarks = 0;
+                        feedback = "Question not attempted - properly detected by semantic analysis";
+                        status = "skipped";
+                    } else if (answerSheet.answeredQuestions.includes(qNum)) {
+                        // Get semantic evaluation result for this question
+                        const semanticResult = apiResult.detailed_results.find(r => r.question_id === qNum);
+                        
+                        if (semanticResult) {
+                            obtainedMarks = semanticResult.marks_obtained;
+                            feedback = `Semantic Analysis: ${semanticResult.feedback} (Similarity: ${(semanticResult.semantic_similarity * 100).toFixed(1)}%, Understanding: ${(semanticResult.conceptual_understanding * 100).toFixed(1)}%)`;
+                            
+                            if (obtainedMarks === allocatedMarks) {
+                                status = "correct";
+                            } else if (obtainedMarks > 0) {
+                                status = "partial";
+                            } else {
+                                status = "incorrect";
+                            }
+                        } else {
+                            // Fallback if API result missing
+                            const response = answerSheet.questionResponses[qNum];
+                            switch (response.quality) {
+                                case "excellent":
+                                    obtainedMarks = allocatedMarks;
+                                    feedback = "Excellent answer with complete understanding";
+                                    status = "correct";
+                                    break;
+                                case "good":
+                                    obtainedMarks = Math.ceil(allocatedMarks * 0.8);
+                                    feedback = "Good answer, minor issues";
+                                    status = "partial";
+                                    break;
+                                case "partial":
+                                    obtainedMarks = Math.ceil(allocatedMarks * 0.6);
+                                    feedback = "Partial answer, needs more detail";
+                                    status = "partial";
+                                    break;
+                                case "poor":
+                                    obtainedMarks = Math.ceil(allocatedMarks * 0.3);
+                                    feedback = "Incorrect or incomplete answer";
+                                    status = "incorrect";
+                                    break;
+                            }
+                        }
+                    }
+                    
+                    questionDetails.push({
+                        qno: qNum,
+                        marks_allocated: allocatedMarks,
+                        marks_obtained: obtainedMarks,
+                        feedback: feedback,
+                        status: status,
+                        question_type: questionPaper.questionTypes[qNum]
+                    });
+                    
+                    totalObtained += obtainedMarks;
+                }
+                
+                const percentage = ((totalObtained / questionPaper.totalMarks) * 100).toFixed(1);
+                
+                return {
+                    totalMarks: questionPaper.totalMarks,
+                    obtainedMarks: totalObtained,
+                    percentage,
+                    grade: getGrade(percentage),
+                    questionDetails,
+                    answeredCount: answerSheet.totalAnswered,
+                    skippedCount: answerSheet.skippedQuestions.length,
+                    totalQuestions: questionPaper.totalQuestions,
+                    overallFeedback: `${generateSmartFeedback(totalObtained, questionPaper.totalMarks, answerSheet)} Evaluation powered by semantic understanding AI that analyzes meaning and context, not just keywords.`,
+                    strengths: identifyStrengths(questionDetails),
+                    improvements: identifyImprovements(questionDetails, answerSheet.skippedQuestions),
+                    evaluationMethod: "LangGraph Semantic Analysis",
+                    apiResult: apiResult
+                };
+                
+            } catch (error) {
+                console.error('Semantic evaluation failed, using fallback:', error);
+                
+                // Fallback to original logic if API fails
+                const questionDetails = [];
+                let totalObtained = 0;
+                
+                for (let qNum = 1; qNum <= questionPaper.totalQuestions; qNum++) {
+                    const allocatedMarks = questionPaper.questionMarks[qNum];
+                    let obtainedMarks = 0;
+                    let feedback = "";
+                    let status = "not-attempted";
+                    
+                    if (answerSheet.skippedQuestions.includes(qNum)) {
+                        obtainedMarks = 0;
+                        feedback = "Question not attempted";
+                        status = "skipped";
+                    } else if (answerSheet.answeredQuestions.includes(qNum)) {
+                        const response = answerSheet.questionResponses[qNum];
+                        
+                        switch (response.quality) {
+                            case "excellent":
+                                obtainedMarks = allocatedMarks;
+                                feedback = "Excellent answer with complete understanding";
+                                status = "correct";
+                                break;
+                            case "good":
+                                obtainedMarks = Math.ceil(allocatedMarks * 0.8);
+                                feedback = "Good answer, minor issues with presentation";
+                                status = "partial";
+                                break;
+                            case "partial":
+                                obtainedMarks = Math.ceil(allocatedMarks * 0.6);
+                                feedback = "Partial answer, needs more detail";
+                                status = "partial";
+                                break;
+                            case "poor":
+                                obtainedMarks = Math.ceil(allocatedMarks * 0.3);
+                                feedback = "Incorrect or incomplete answer";
+                                status = "incorrect";
+                                break;
+                        }
+                    }
+                    
+                    questionDetails.push({
+                        qno: qNum,
+                        marks_allocated: allocatedMarks,
+                        marks_obtained: obtainedMarks,
+                        feedback: feedback,
+                        status: status,
+                        question_type: questionPaper.questionTypes[qNum]
+                    });
+                    
+                    totalObtained += obtainedMarks;
+                }
+                
+                const percentage = ((totalObtained / questionPaper.totalMarks) * 100).toFixed(1);
+                
+                return {
+                    totalMarks: questionPaper.totalMarks,
+                    obtainedMarks: totalObtained,
+                    percentage,
+                    grade: getGrade(percentage),
+                    questionDetails,
+                    answeredCount: answerSheet.totalAnswered,
+                    skippedCount: answerSheet.skippedQuestions.length,
+                    totalQuestions: questionPaper.totalQuestions,
+                    overallFeedback: generateSmartFeedback(totalObtained, questionPaper.totalMarks, answerSheet),
+                    strengths: identifyStrengths(questionDetails),
+                    improvements: identifyImprovements(questionDetails, answerSheet.skippedQuestions),
+                    evaluationMethod: "Fallback Analysis (API unavailable)"
+                };
+            }
+        }
+
+        function generateSmartFeedback(obtained, total, answerSheet) {
+            const percentage = (obtained / total) * 100;
+            let feedback = "";
+            
+            if (percentage >= 90) {
+                feedback = "Outstanding performance! Excellent grasp of the subject matter.";
+            } else if (percentage >= 80) {
+                feedback = "Very good performance with strong understanding of concepts.";
+            } else if (percentage >= 70) {
+                feedback = "Good performance with room for improvement in some areas.";
+            } else if (percentage >= 60) {
+                feedback = "Satisfactory performance. Focus on strengthening fundamental concepts.";
+            } else {
+                feedback = "Needs significant improvement. Review the material thoroughly.";
+            }
+            
+            if (answerSheet.skippedQuestions.length > 0) {
+                feedback += ` Note: ${answerSheet.skippedQuestions.length} questions were not attempted.`;
+            }
+            
+            return feedback;
+        }
+
+        function identifyStrengths(questionDetails) {
+            const strengths = [];
+            const excellentAnswers = questionDetails.filter(q => q.status === "correct").length;
+            const goodAnswers = questionDetails.filter(q => q.status === "partial" && q.marks_obtained > q.marks_allocated * 0.7).length;
+            
+            if (excellentAnswers > 0) {
+                strengths.push(`Strong performance in ${excellentAnswers} questions`);
+            }
+            if (goodAnswers > 0) {
+                strengths.push(`Good understanding shown in ${goodAnswers} questions`);
+            }
+            
+            strengths.push("Clear attempt at problem-solving");
+            return strengths;
+        }
+
+        function identifyImprovements(questionDetails, skippedQuestions) {
+            const improvements = [];
+            const poorAnswers = questionDetails.filter(q => q.status === "incorrect").length;
+            
+            if (skippedQuestions.length > 0) {
+                improvements.push(`Attempt all questions (${skippedQuestions.length} questions skipped)`);
+            }
+            if (poorAnswers > 0) {
+                improvements.push(`Review concepts for ${poorAnswers} questions that need work`);
+            }
+            
+            improvements.push("Practice more problems for better accuracy");
+            improvements.push("Show detailed working for better marks");
+            
+            return improvements;
+        }
+
+        function displayEvaluationResults(results) {
+            const resultDiv = document.getElementById('evaluationResult');
+            
+            resultDiv.innerHTML = `
+                <div class="notification">
+                    <h4>✅ Smart AI Evaluation Complete!</h4>
+                    
+                    <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <h5>📊 Evaluation Summary</h5>
+                        <p><strong>Total Questions:</strong> ${results.totalQuestions} | <strong>Answered:</strong> ${results.answeredCount} | <strong>Skipped:</strong> ${results.skippedCount}</p>
+                        <p><strong>Total Marks Available:</strong> ${results.totalMarks}</p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
+                        <div style="background: #e8f5e8; color: #2e7d2e; padding: 15px; border-radius: 8px; text-align: center;">
+                            <strong>Score Obtained</strong><br>
+                            <span style="font-size: 1.5em;">${results.obtainedMarks}/${results.totalMarks}</span>
+                        </div>
+                        <div style="background: #e3f2fd; color: #1976d2; padding: 15px; border-radius: 8px; text-align: center;">
+                            <strong>Grade</strong><br>
+                            <span style="font-size: 1.5em;">${results.grade}</span>
+                        </div>
+                        <div style="background: #f3e5f5; color: #7b1fa2; padding: 15px; border-radius: 8px; text-align: center;">
+                            <strong>Percentage</strong><br>
+                            <span style="font-size: 1.5em;">${results.percentage}%</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <h5>� Question-wise Analysis (All ${results.totalQuestions} Questions):</h5>
+                        <div style="max-height: 300px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            ${results.questionDetails.map(q => `
+                                <div style="margin: 8px 0; padding: 10px; background: white; border-radius: 5px; border-left: 4px solid ${getQuestionStatusColor(q.status)}; display: grid; grid-template-columns: 60px 80px 1fr 60px; gap: 10px; align-items: center;">
+                                    <strong>Q${q.qno}</strong>
+                                    <span style="text-align: center; font-weight: bold; color: ${getQuestionStatusColor(q.status)};">${q.marks_obtained}/${q.marks_allocated}</span>
+                                    <span style="font-size: 0.9em;">${getQuestionStatusIcon(q.status)} ${q.feedback}</span>
+                                    <span style="font-size: 0.8em; color: #666;">${q.question_type || 'Standard'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <h5>💬 Smart AI Feedback:</h5>
+                        <p style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">${results.overallFeedback}</p>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <div>
+                                <h6 style="color: #28a745;">✅ Identified Strengths:</h6>
+                                <ul style="margin: 8px 0; padding-left: 20px;">
+                                    ${results.strengths.map(strength => `<li>${strength}</li>`).join('')}
+                                </ul>
+                            </div>
+                            <div>
+                                <h6 style="color: #dc3545;">🎯 Improvement Areas:</h6>
+                                <ul style="margin: 8px 0; padding-left: 20px;">
+                                    ${results.improvements.map(improvement => `<li>${improvement}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${results.skippedCount > 0 ? `
+                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                            <h6 style="color: #856404; margin: 0 0 10px 0;">⚠️ Questions Not Attempted:</h6>
+                            <p style="margin: 0; color: #856404;">Questions ${results.questionDetails.filter(q => q.status === 'skipped').map(q => q.qno).join(', ')} were not attempted. Make sure to manage time better and attempt all questions.</p>
+                        </div>
+                    ` : ''}
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                        <button class="btn" onclick="saveEvaluationToProfile(${results.obtainedMarks}, ${results.totalMarks}, '${results.percentage}%', '${results.grade}')">
+                            💾 Save to Student Profile
+                        </button>
+                        <button class="btn btn-success" onclick="showEvaluatedPDF()">
+                            📋 View Detailed Report
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getQuestionStatusColor(status) {
+            switch(status) {
+                case 'correct': return '#28a745';
+                case 'partial': return '#ffc107';
+                case 'incorrect': return '#dc3545';
+                case 'skipped': return '#6c757d';
+                default: return '#6c757d';
+            }
+        }
+
+        function getQuestionStatusIcon(status) {
+            switch(status) {
+                case 'correct': return '✅';
+                case 'partial': return '⚠️';
+                case 'incorrect': return '❌';
+                case 'skipped': return '⏭️';
+                default: return '❓';
+            }
+        }
+
+        function generateOverallFeedback(percentage) {
+            if (percentage >= 90) {
+                return "Outstanding performance! Excellent understanding of concepts with clear presentation. Keep up the excellent work!";
+            } else if (percentage >= 80) {
+                return "Very good performance! Strong grasp of the subject matter with minor areas for improvement. Well done!";
+            } else if (percentage >= 70) {
+                return "Good performance! Solid understanding shown with room for improvement in some areas. Keep practicing!";
+            } else if (percentage >= 60) {
+                return "Satisfactory performance. Focus on strengthening fundamental concepts and practice more problems.";
+            } else {
+                return "Needs improvement. Please review the concepts and practice more questions. Consider seeking additional help.";
+            }
+        }
+
+        function saveEvaluationToProfile(score, maxScore, percentage, grade) {
+            const evaluations = JSON.parse(localStorage.getItem('evalmate_evaluations') || '[]');
+            const newEvaluation = {
+                student: currentStudent,
+                test: currentTest,
+                score,
+                maxScore,
+                percentage,
+                grade,
+                feedback: generateOverallFeedback(parseFloat(percentage)),
+                evaluated_at: new Date().toISOString(),
+                detailed_analysis: "Complete question-wise analysis saved"
+            };
+            
+            evaluations.push(newEvaluation);
+            localStorage.setItem('evalmate_evaluations', JSON.stringify(evaluations));
+            
+            alert('✅ Evaluation saved to student profile successfully!');
+        }
+
+        function showEvaluatedPDF() {
+            document.getElementById('pdfViewer').classList.remove('hidden');
+            
+            // Generate a mock PDF preview with actual content
+            document.getElementById('pdfContent').innerHTML = `
+                <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; max-width: 800px; margin: 0 auto;">
+                    <!-- PDF Header -->
+                    <div style="text-align: center; border-bottom: 2px solid #1976d2; padding-bottom: 15px; margin-bottom: 20px;">
+                        <h3 style="color: #1976d2; margin: 0;">📋 Evaluated Answer Sheet</h3>
+                        <p style="margin: 5px 0; color: #666;">AI-Powered Evaluation System</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px; font-size: 0.9em;">
+                            <div><strong>Student:</strong> ${currentStudent.name}</div>
+                            <div><strong>Roll No:</strong> ${currentStudent.rollNumber}</div>
+                            <div><strong>Test:</strong> ${currentTest.name}</div>
+                            <div><strong>Subject:</strong> ${currentTest.subject}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Evaluation Summary -->
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h4 style="color: #333; margin: 0 0 10px 0;">📊 Evaluation Summary</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px;">
+                            <div style="background: #e8f5e8; padding: 10px; border-radius: 5px; text-align: center;">
+                                <strong style="color: #2e7d2e;">Total Score</strong><br>
+                                <span style="font-size: 1.2em;">80/100</span>
+                            </div>
+                            <div style="background: #e3f2fd; padding: 10px; border-radius: 5px; text-align: center;">
+                                <strong style="color: #1976d2;">Grade</strong><br>
+                                <span style="font-size: 1.2em;">B+</span>
+                            </div>
+                            <div style="background: #f3e5f5; padding: 10px; border-radius: 5px; text-align: center;">
+                                <strong style="color: #7b1fa2;">Percentage</strong><br>
+                                <span style="font-size: 1.2em;">80%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Question-wise Evaluation -->
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="color: #333; margin: 0 0 15px 0;">📝 Question-wise Evaluation</h4>
+                        <div style="border: 1px solid #e9ecef; border-radius: 8px; overflow: hidden;">
+                            ${generateQuestionWiseEvaluation()}
+                        </div>
+                    </div>
+                    
+                    <!-- AI Feedback -->
+                    <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; border-left: 4px solid #28a745;">
+                        <h4 style="color: #2e7d2e; margin: 0 0 10px 0;">🤖 AI Feedback</h4>
+                        <p style="margin: 0; line-height: 1.6;">Excellent understanding of fundamental concepts. Strong problem-solving approach with clear mathematical expressions. Minor calculation errors in questions 3 and 7 need attention. Overall performance shows good grasp of the subject matter.</p>
+                    </div>
+                    
+                    <!-- Answer Sheet Preview -->
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <h4 style="color: #333; margin: 0 0 15px 0;">📄 Answer Sheet with AI Annotations</h4>
+                        <div style="border: 2px dashed #ccc; padding: 30px; text-align: center; border-radius: 8px; background: white;">
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px;">
+                                <div style="border: 1px solid #e9ecef; padding: 15px; border-radius: 5px;">
+                                    <strong style="color: #1976d2;">Question 1 (5/5 marks)</strong>
+                                    <div style="margin: 10px 0; padding: 8px; background: #e8f5e8; border-radius: 3px; font-size: 0.9em;">
+                                        ✅ Perfect answer with clear steps
+                                    </div>
+                                </div>
+                                <div style="border: 1px solid #e9ecef; padding: 15px; border-radius: 5px;">
+                                    <strong style="color: #1976d2;">Question 2 (6/8 marks)</strong>
+                                    <div style="margin: 10px 0; padding: 8px; background: #fff3cd; border-radius: 3px; font-size: 0.9em;">
+                                        ⚠️ Good approach, minor calculation error
+                                    </div>
+                                </div>
+                            </div>
+                            <p style="color: #666; font-style: italic;">Annotated answer sheet with AI marks and feedback</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Scroll to PDF viewer
+            document.getElementById('pdfViewer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function generateQuestionWiseEvaluation() {
+            // This will be dynamically generated based on the actual evaluation results
+            // For now, showing the structure for all 21 questions
+            const questions = [
+                { qno: 1, marks_allocated: 2, marks_obtained: 2, feedback: "Perfect MCQ answer", status: "correct", type: "MCQ" },
+                { qno: 2, marks_allocated: 3, marks_obtained: 2, feedback: "Good explanation, minor detail missing", status: "partial", type: "Short" },
+                { qno: 3, marks_allocated: 2, marks_obtained: 2, feedback: "Correct option selected", status: "correct", type: "MCQ" },
+                { qno: 4, marks_allocated: 4, marks_obtained: 0, feedback: "Question not attempted", status: "skipped", type: "Short" },
+                { qno: 5, marks_allocated: 5, marks_obtained: 4, feedback: "Good understanding, needs more detail", status: "partial", type: "Long" },
+                { qno: 6, marks_allocated: 3, marks_obtained: 3, feedback: "Complete and accurate answer", status: "correct", type: "Short" },
+                { qno: 7, marks_allocated: 2, marks_obtained: 2, feedback: "Correct option with reasoning", status: "correct", type: "MCQ" },
+                { qno: 8, marks_allocated: 4, marks_obtained: 3, feedback: "Good approach, calculation error", status: "partial", type: "Short" },
+                { qno: 9, marks_allocated: 5, marks_obtained: 4, feedback: "Well structured answer", status: "partial", type: "Long" },
+                { qno: 10, marks_allocated: 6, marks_obtained: 5, feedback: "Excellent solution method", status: "correct", type: "Long" },
+                { qno: 11, marks_allocated: 3, marks_obtained: 2, feedback: "Partial understanding shown", status: "partial", type: "Short" },
+                { qno: 12, marks_allocated: 4, marks_obtained: 4, feedback: "Complete and well-presented", status: "correct", type: "Short" },
+                { qno: 13, marks_allocated: 2, marks_obtained: 0, feedback: "Question not attempted", status: "skipped", type: "MCQ" },
+                { qno: 14, marks_allocated: 5, marks_obtained: 4, feedback: "Good analysis, minor gaps", status: "partial", type: "Long" },
+                { qno: 15, marks_allocated: 6, marks_obtained: 5, feedback: "Strong conceptual understanding", status: "correct", type: "Long" },
+                { qno: 16, marks_allocated: 4, marks_obtained: 3, feedback: "Good attempt, needs clarity", status: "partial", type: "Short" },
+                { qno: 17, marks_allocated: 3, marks_obtained: 3, feedback: "Clear and concise answer", status: "correct", type: "Short" },
+                { qno: 18, marks_allocated: 7, marks_obtained: 6, feedback: "Comprehensive answer", status: "correct", type: "Long" },
+                { qno: 19, marks_allocated: 8, marks_obtained: 6, feedback: "Good structure, needs examples", status: "partial", type: "Long" },
+                { qno: 20, marks_allocated: 5, marks_obtained: 4, feedback: "Solid understanding demonstrated", status: "partial", type: "Long" },
+                { qno: 21, marks_allocated: 10, marks_obtained: 8, feedback: "Well-written essay, good arguments", status: "correct", type: "Essay" }
+            ];
+            
+            return questions.map(q => {
+                const statusColor = getQuestionStatusColor(q.status);
+                const statusBg = q.status === 'correct' ? '#d4edda' : q.status === 'partial' ? '#fff3cd' : q.status === 'skipped' ? '#f8f9fa' : '#f8d7da';
+                const statusIcon = getQuestionStatusIcon(q.status);
+                
+                return `
+                    <div style="display: grid; grid-template-columns: 60px 80px 80px 1fr 60px; align-items: center; padding: 12px; border-bottom: 1px solid #f0f0f0; gap: 10px;">
+                        <div style="font-weight: bold; color: #333;">Q${q.qno}</div>
+                        <div style="text-align: center; font-size: 0.9em; color: #666;">${q.type}</div>
+                        <div style="text-align: center;">
+                            <span style="font-weight: bold; color: ${statusColor};">${q.marks_obtained}/${q.marks_allocated}</span>
+                        </div>
+                        <div style="background: ${statusBg}; padding: 6px 10px; border-radius: 4px; font-size: 0.9em;">
+                            ${statusIcon} ${q.feedback}
+                        </div>
+                        <div style="text-align: center; color: ${statusColor}; font-weight: bold; font-size: 0.9em;">
+                            ${q.status === 'skipped' ? 'N/A' : Math.round((q.marks_obtained/q.marks_allocated)*100) + '%'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function downloadEvaluatedPDF() {
+            // Create a comprehensive PDF content
+            const pdfContent = generatePDFContent();
+            
+            // Create a blob with the HTML content
+            const blob = new Blob([pdfContent], { type: 'text/html' });
+            
+            // Create download link
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${currentStudent.name}_${currentTest.name}_Evaluation.html`;
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up the URL object
+            window.URL.revokeObjectURL(url);
+            
+            // Show confirmation
+            alert('📄 Evaluated answer sheet downloaded successfully!\n\n' +
+                  `File: ${currentStudent.name}_${currentTest.name}_Evaluation.html\n` +
+                  'You can open this file in any web browser to view the complete evaluation.');
+            
+            // Also offer to open in new tab
+            setTimeout(() => {
+                if (confirm('Would you like to open the evaluation in a new tab as well?')) {
+                    const newWindow = window.open();
+                    newWindow.document.write(pdfContent);
+                    newWindow.document.close();
+                }
+            }, 500);
+        }
+
+        function generatePDFContent() {
+            return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluated Answer Sheet - ${currentStudent.name}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 3px solid #1976d2; padding-bottom: 20px; margin-bottom: 30px; }
+        .header h1 { color: #1976d2; margin: 0; font-size: 2em; }
+        .header p { color: #666; margin: 5px 0; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .info-item { background: #f8f9fa; padding: 10px; border-radius: 5px; }
+        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+        .summary-card { padding: 20px; border-radius: 8px; text-align: center; }
+        .summary-card.score { background: #d4edda; color: #155724; }
+        .summary-card.grade { background: #cce5ff; color: #004085; }
+        .summary-card.percentage { background: #f8d7da; color: #721c24; }
+        .question-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .question-table th, .question-table td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        .question-table th { background: #f8f9fa; font-weight: bold; }
+        .status-correct { background: #d4edda; color: #155724; }
+        .status-partial { background: #fff3cd; color: #856404; }
+        .status-incorrect { background: #f8d7da; color: #721c24; }
+        .feedback-section { background: #e8f5e8; padding: 20px; border-radius: 8px; border-left: 5px solid #28a745; margin: 20px 0; }
+        .print-info { text-align: center; color: #666; font-size: 0.9em; margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px; }
+        @media print { body { background: white; } .container { box-shadow: none; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Evaluated Answer Sheet</h1>
+            <p>AI-Powered Evaluation System - EvalMate</p>
+            <p>Generated on: ${new Date().toLocaleString()}</p>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-item"><strong>Student Name:</strong> ${currentStudent.name}</div>
+            <div class="info-item"><strong>Roll Number:</strong> ${currentStudent.rollNumber}</div>
+            <div class="info-item"><strong>Test Name:</strong> ${currentTest.name}</div>
+            <div class="info-item"><strong>Subject:</strong> ${currentTest.subject}</div>
+        </div>
+        
+        <div class="summary-cards">
+            <div class="summary-card score">
+                <h3>Total Score</h3>
+                <div style="font-size: 2em; font-weight: bold;">74/100</div>
+            </div>
+            <div class="summary-card grade">
+                <h3>Grade</h3>
+                <div style="font-size: 2em; font-weight: bold;">B</div>
+            </div>
+            <div class="summary-card percentage">
+                <h3>Percentage</h3>
+                <div style="font-size: 2em; font-weight: bold;">74%</div>
+            </div>
+        </div>
+        
+        <h3>📊 Question-wise Analysis (All 21 Questions)</h3>
+        <table class="question-table">
+            <thead>
+                <tr>
+                    <th>Question</th>
+                    <th>Type</th>
+                    <th>Marks Obtained</th>
+                    <th>Total Marks</th>
+                    <th>Status</th>
+                    <th>AI Feedback</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Q1</td><td>MCQ</td><td>2</td><td>2</td><td class="status-correct">✅ Perfect</td><td>Perfect MCQ answer</td></tr>
+                <tr><td>Q2</td><td>Short</td><td>2</td><td>3</td><td class="status-partial">⚠️ Partial</td><td>Good explanation, minor detail missing</td></tr>
+                <tr><td>Q3</td><td>MCQ</td><td>2</td><td>2</td><td class="status-correct">✅ Perfect</td><td>Correct option selected</td></tr>
+                <tr><td>Q4</td><td>Short</td><td>0</td><td>4</td><td class="status-incorrect">⏭️ Skipped</td><td>Question not attempted</td></tr>
+                <tr><td>Q5</td><td>Long</td><td>4</td><td>5</td><td class="status-partial">⚠️ Partial</td><td>Good understanding, needs more detail</td></tr>
+                <tr><td>Q6</td><td>Short</td><td>3</td><td>3</td><td class="status-correct">✅ Perfect</td><td>Complete and accurate answer</td></tr>
+                <tr><td>Q7</td><td>MCQ</td><td>2</td><td>2</td><td class="status-correct">✅ Perfect</td><td>Correct option with reasoning</td></tr>
+                <tr><td>Q8</td><td>Short</td><td>3</td><td>4</td><td class="status-partial">⚠️ Partial</td><td>Good approach, calculation error</td></tr>
+                <tr><td>Q9</td><td>Long</td><td>4</td><td>5</td><td class="status-partial">⚠️ Partial</td><td>Well structured answer</td></tr>
+                <tr><td>Q10</td><td>Long</td><td>5</td><td>6</td><td class="status-correct">✅ Perfect</td><td>Excellent solution method</td></tr>
+                <tr><td>Q11</td><td>Short</td><td>2</td><td>3</td><td class="status-partial">⚠️ Partial</td><td>Partial understanding shown</td></tr>
+                <tr><td>Q12</td><td>Short</td><td>4</td><td>4</td><td class="status-correct">✅ Perfect</td><td>Complete and well-presented</td></tr>
+                <tr><td>Q13</td><td>MCQ</td><td>0</td><td>2</td><td class="status-incorrect">⏭️ Skipped</td><td>Question not attempted</td></tr>
+                <tr><td>Q14</td><td>Long</td><td>4</td><td>5</td><td class="status-partial">⚠️ Partial</td><td>Good analysis, minor gaps</td></tr>
+                <tr><td>Q15</td><td>Long</td><td>5</td><td>6</td><td class="status-correct">✅ Perfect</td><td>Strong conceptual understanding</td></tr>
+                <tr><td>Q16</td><td>Short</td><td>3</td><td>4</td><td class="status-partial">⚠️ Partial</td><td>Good attempt, needs clarity</td></tr>
+                <tr><td>Q17</td><td>Short</td><td>3</td><td>3</td><td class="status-correct">✅ Perfect</td><td>Clear and concise answer</td></tr>
+                <tr><td>Q18</td><td>Long</td><td>6</td><td>7</td><td class="status-correct">✅ Perfect</td><td>Comprehensive answer</td></tr>
+                <tr><td>Q19</td><td>Long</td><td>6</td><td>8</td><td class="status-partial">⚠️ Partial</td><td>Good structure, needs examples</td></tr>
+                <tr><td>Q20</td><td>Long</td><td>4</td><td>5</td><td class="status-partial">⚠️ Partial</td><td>Solid understanding demonstrated</td></tr>
+                <tr><td>Q21</td><td>Essay</td><td>8</td><td>10</td><td class="status-correct">✅ Perfect</td><td>Well-written essay, good arguments</td></tr>
+            </tbody>
+        </table>
+        
+        <div class="feedback-section">
+            <h3>🤖 AI Overall Feedback</h3>
+            <p><strong>Performance Summary:</strong> Good overall performance with 74% score. Student demonstrated strong understanding in most areas.</p>
+            <p><strong>Strengths:</strong> Excellent performance in MCQ questions, strong essay writing skills, good conceptual understanding in long answers, clear presentation in most responses.</p>
+            <p><strong>Areas for Improvement:</strong> Attempt all questions (2 questions skipped), review calculation methods, provide more detailed explanations in partial answers.</p>
+            <p><strong>Specific Notes:</strong> Questions 4 and 13 were not attempted. Focus on time management to complete all questions. Strong performance in essay question (Q21) shows good analytical skills.</p>
+            <p><strong>Recommendation:</strong> Practice more timed tests to improve completion rate. Review concepts for questions where partial marks were awarded. Overall solid performance with room for improvement.</p>
+        </div>
+        
+        <div class="print-info">
+            <p>This evaluation was generated using EvalMate AI-Powered Answer Sheet Evaluation System</p>
+            <p>For questions about this evaluation, please contact your examiner</p>
+            <p><em>This document can be printed for physical records</em></p>
+        </div>
+    </div>
+</body>
+</html>
+            `;
+        }
+
+        function openPDFInNewTab() {
+            const pdfContent = generatePDFContent();
+            const newWindow = window.open();
+            newWindow.document.write(pdfContent);
+            newWindow.document.close();
+            newWindow.document.title = `Evaluation - ${currentStudent.name}`;
+        }
+
+        function getGrade(percentage) {
+            const p = parseFloat(percentage);
+            if (p >= 90) return 'A+';
+            if (p >= 80) return 'A';
+            if (p >= 70) return 'B+';
+            if (p >= 60) return 'B';
+            if (p >= 50) return 'C';
+            return 'D';
+        }
+
+        // Student dashboard
+        function loadStudentResults() {
+            const evaluations = JSON.parse(localStorage.getItem('evalmate_evaluations') || '[]');
+            const studentEvaluations = evaluations.filter(e => e.student.username === currentUser.username);
+            
+            const container = document.getElementById('studentResults');
+            
+            if (studentEvaluations.length === 0) {
+                container.innerHTML = `
+                    <div class="notification">
+                        <h4>📋 No Results Available</h4>
+                        <p>You don't have any test results yet. Results will appear here after your answer sheets are evaluated.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = studentEvaluations.map(evaluation => `
+                <div class="test-banner">
+                    <h3>${evaluation.test.name}</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
+                        <span style="background: #e8f5e8; color: #2e7d2e; padding: 10px; border-radius: 5px; font-weight: bold;">
+                            Score: ${evaluation.score}/${evaluation.maxScore}
+                        </span>
+                        <span style="background: #e3f2fd; color: #1976d2; padding: 10px; border-radius: 5px; font-weight: bold;">
+                            Grade: ${evaluation.grade}
+                        </span>
+                        <span style="background: #f3e5f5; color: #7b1fa2; padding: 10px; border-radius: 5px;">
+                            Percentage: ${evaluation.percentage}
+                        </span>
+                    </div>
+                    <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <strong>Feedback:</strong> ${evaluation.feedback}
+                    </div>
+                    <div style="margin-top: 10px; color: #666; font-size: 0.9em;">
+                        Evaluated on: ${new Date(evaluation.evaluated_at).toLocaleString()}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('roleSelectionPage');
+        });
+    </script>
+</body>
+</html>

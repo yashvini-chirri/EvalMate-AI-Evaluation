@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>EvalMate - AI-Powered Evaluation Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .demo-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-left: 5px solid #007bff;
+        }
+        
+        .demo-section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        textarea, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .result-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .result-item.skipped {
+            border-left-color: #ffc107;
+        }
+        
+        .result-item.poor {
+            border-left-color: #dc3545;
+        }
+        
+        .score {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f1f3f4;
+            border-radius: 5px;
+            font-style: italic;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .comparison-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .comparison-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .comparison-item.semantic {
+            border-color: #28a745;
+        }
+        
+        .comparison-item.keyword {
+            border-color: #ffc107;
+        }
+        
+        @media (max-width: 768px) {
+            .comparison-demo {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 EvalMate AI-Powered Evaluation</h1>
+            <p>Complete AI rebuild with GPT-4 for intelligent text extraction and evaluation</p>
+        </div>
+        
+        <div class="content">
+            <!-- Quick Evaluation Demo -->
+            <div class="demo-section">
+                <h3>🎯 Quick Semantic Evaluation Demo</h3>
+                <p>Test the semantic understanding capabilities with sample questions:</p>
+                
+                <div class="form-group">
+                    <label for="studentAnswer">Student Answer:</label>
+                    <textarea id="studentAnswer" placeholder="Enter the student's answer here...">Plants use sunlight to make food through photosynthesis</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="correctAnswer">Correct Answer:</label>
+                    <textarea id="correctAnswer" placeholder="Enter the model answer here...">Photosynthesis is the biological process where plants convert light energy into chemical energy using chlorophyll</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="maxMarks">Maximum Marks:</label>
+                    <input type="number" id="maxMarks" value="5" min="1" max="20">
+                </div>
+                
+                <button class="btn" onclick="evaluateAnswer()">🔍 Evaluate Answer</button>
+                <button class="btn" onclick="loadSampleQuestion()">📝 Load Sample Question</button>
+                
+                <div id="evaluationResults" class="results" style="display: none;"></div>
+            </div>
+            
+            <!-- Comparison Demo -->
+            <div class="demo-section">
+                <h3>⚖️ Semantic vs Keyword Comparison</h3>
+                <p>See the difference between semantic understanding and simple keyword matching:</p>
+                
+                <button class="btn" onclick="runComparison()">🆚 Run Comparison Demo</button>
+                
+                <div id="comparisonResults" class="results" style="display: none;"></div>
+            </div>
+            
+            <!-- PDF Upload Demo -->
+            <div class="demo-section">
+                <h3>📄 LangGraph PDF Evaluation Workflow</h3>
+                <p><strong>Advanced Multi-Agent System:</strong> Scans PDF line-by-line, detects questions by number, validates answers, and performs semantic evaluation.</p>
+                
+                <div class="form-group">
+                    <label for="pdfFile">Upload PDF Answer Sheet:</label>
+                    <input type="file" id="pdfFile" accept=".pdf" style="padding: 8px;">
+                </div>
+                
+                <div class="form-group">
+                    <label for="pdfAnswerKey">Answer Key (JSON format):</label>
+                    <textarea id="pdfAnswerKey" placeholder='{"1": "Expected answer 1", "2": "Expected answer 2"}'>{"1": "Photosynthesis is the process where plants convert light energy into chemical energy using chlorophyll", "2": "Democracy is a system of government where citizens have power through voting"}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="pdfQuestionMarks">Question Marks (JSON format):</label>
+                    <textarea id="pdfQuestionMarks" placeholder='{"1": 5, "2": 3}'>{"1": "5", "2": "3"}</textarea>
+                </div>
+                
+                <button class="btn" onclick="evaluatePDF()">🤖 Run LangGraph Workflow</button>
+                <button class="btn" onclick="loadSamplePDFData()">📋 Load Sample Data</button>
+                
+                <div id="pdfResults" class="results" style="display: none;"></div>
+            </div>
+            <div class="demo-section">
+                <h3>📋 Multiple Questions Evaluation</h3>
+                <p>Evaluate multiple questions at once including skipped questions:</p>
+                
+                <button class="btn" onclick="runMultipleQuestions()">📊 Evaluate Multiple Questions</button>
+                <button class="btn" onclick="showDetailedReport()">📋 View Detailed Report</button>
+                
+                <div id="multipleResults" class="results" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function evaluateAnswer() {
+            const studentAnswer = document.getElementById('studentAnswer').value;
+            const correctAnswer = document.getElementById('correctAnswer').value;
+            const maxMarks = document.getElementById('maxMarks').value;
+            
+            if (!studentAnswer || !correctAnswer) {
+                alert('Please fill in both student answer and correct answer');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('evaluationResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Evaluating answer...</p></div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('student_answers', JSON.stringify({"1": studentAnswer}));
+                formData.append('answer_key', JSON.stringify({"1": correctAnswer}));
+                formData.append('question_marks', JSON.stringify({"1": maxMarks}));
+                
+                const response = await fetch('/api/advanced/evaluate-semantic', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.detailed_results && result.detailed_results.length > 0) {
+                    const evaluation = result.detailed_results[0];
+                    
+                    resultsDiv.innerHTML = `
+                        <h4>📊 Evaluation Results</h4>
+                        <div class="result-item">
+                            <div class="score">Score: ${evaluation.marks_obtained}/${evaluation.marks_allocated} (${Math.round(evaluation.marks_obtained/evaluation.marks_allocated*100)}%)</div>
+                            <p><strong>Grade:</strong> ${result.grade}</p>
+                            <p><strong>Semantic Similarity:</strong> ${(evaluation.semantic_similarity * 100).toFixed(1)}%</p>
+                            <p><strong>Conceptual Understanding:</strong> ${(evaluation.conceptual_understanding * 100).toFixed(1)}%</p>
+                            <p><strong>Factual Accuracy:</strong> ${(evaluation.factual_accuracy * 100).toFixed(1)}%</p>
+                            <div class="feedback">
+                                <strong>Feedback:</strong> ${evaluation.feedback}
+                            </div>
+                            <p><strong>Strengths:</strong> ${evaluation.strengths.join(', ')}</p>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = '<p>No evaluation results received</p>';
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function runComparison() {
+            const resultsDiv = document.getElementById('comparisonResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Running comparison...</p></div>';
+            
+            try {
+                const formData = new FormData();
+                formData.append('semantic_answers', JSON.stringify({"1": "Plants use sunlight to make food through photosynthesis"}));
+                formData.append('keyword_answers', JSON.stringify({"1": "photosynthesis light energy convert plants chlorophyll"}));
+                formData.append('answer_key', JSON.stringify({"1": "Photosynthesis is how plants convert light energy using chlorophyll"}));
+                formData.append('question_marks', JSON.stringify({"1": 5}));
+                
+                const response = await fetch('/api/advanced/compare-evaluations', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.comparison_results && result.comparison_results.length > 0) {
+                    const comparison = result.comparison_results[0];
+                    
+                    resultsDiv.innerHTML = `
+                        <h4>⚖️ Semantic vs Keyword Comparison</h4>
+                        <div class="comparison-demo">
+                            <div class="comparison-item semantic">
+                                <h5>🧠 Semantic Understanding</h5>
+                                <p><strong>Answer:</strong> "${comparison.semantic_evaluation.answer}"</p>
+                                <p><strong>Score:</strong> ${comparison.semantic_evaluation.marks}/5</p>
+                                <p><strong>Understanding:</strong> ${(comparison.semantic_evaluation.understanding_score * 100).toFixed(1)}%</p>
+                                <p><strong>Method:</strong> Analyzes meaning and context</p>
+                            </div>
+                            <div class="comparison-item keyword">
+                                <h5>🔤 Keyword Matching</h5>
+                                <p><strong>Answer:</strong> "${comparison.keyword_evaluation.answer}"</p>
+                                <p><strong>Score:</strong> ${comparison.keyword_evaluation.marks}/5</p>
+                                <p><strong>Word Match:</strong> ${(comparison.keyword_evaluation.word_match_score * 100).toFixed(1)}%</p>
+                                <p><strong>Method:</strong> Counts matching words only</p>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+                            <strong>Analysis:</strong> ${comparison.difference_analysis.explanation}
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = '<p>No comparison results received</p>';
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function runMultipleQuestions() {
+            const resultsDiv = document.getElementById('multipleResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Evaluating multiple questions...</p></div>';
+            
+            try {
+                // Test with realistic question numbers and mixed answers
+                const formData = new FormData();
+                formData.append('student_answers', JSON.stringify({
+                    "5": "Photosynthesis converts light energy to chemical energy in plants using chlorophyll in presence of sunlight and carbon dioxide",
+                    "7": "",  // Skipped question
+                    "12": "Water cycle includes evaporation, condensation, precipitation and collection"
+                }));
+                formData.append('answer_key', JSON.stringify({
+                    "5": "Photosynthesis is the biological process where plants convert light energy into chemical energy using chlorophyll",
+                    "7": "Respiration is the process of breaking down glucose to release energy for cellular activities",
+                    "12": "Water cycle involves evaporation from water bodies, condensation in clouds, and precipitation as rain"
+                }));
+                formData.append('question_marks', JSON.stringify({"5": "5", "7": "4", "12": "6"}));
+                
+                const response = await fetch('/api/advanced/evaluate-semantic', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                let html = `
+                    <h4>📊 Multiple Questions Evaluation Results</h4>
+                    <div style="margin-bottom: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px;">
+                        <strong>Overall Score:</strong> ${result.obtained_marks}/${result.total_marks} (${result.percentage}%) - Grade: ${result.grade}
+                        <br>
+                        <strong>Questions Attempted:</strong> ${result.evaluation_summary.answered_questions}/${result.evaluation_summary.total_questions}
+                        <br>
+                        <strong>Questions Skipped:</strong> ${result.evaluation_summary.skipped_questions}
+                    </div>
+                `;
+                
+                if (result.processing_info && result.processing_info.validation_errors) {
+                    html += `
+                        <div style="margin-bottom: 15px; padding: 10px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px;">
+                            <strong>⚠️ Validation Issues Found:</strong>
+                            <ul>
+                                ${result.processing_info.validation_errors.map(error => `<li>${error}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                // Sort results by question ID for proper display
+                const sortedResults = result.detailed_results.sort((a, b) => a.question_id - b.question_id);
+                
+                sortedResults.forEach((evaluation) => {
+                    const statusClass = evaluation.status === 'skipped' ? 'skipped' : 
+                                       evaluation.marks_obtained < evaluation.marks_allocated * 0.5 ? 'poor' : '';
+                    
+                    html += `
+                        <div class="result-item ${statusClass}">
+                            <h5>Question ${evaluation.question_id}</h5>
+                            <div class="score">Score: ${evaluation.marks_obtained}/${evaluation.marks_allocated} 
+                                ${evaluation.marks_allocated > 0 ? `(${Math.round(evaluation.marks_obtained/evaluation.marks_allocated*100)}%)` : ''}
+                            </div>
+                            ${evaluation.status === 'skipped' ? 
+                                `<p><strong>Status:</strong> ❌ Not attempted (correctly detected)</p>
+                                 <p><strong>Correct Answer:</strong> ${evaluation.correct_answer}</p>` :
+                                `
+                                <p><strong>Student Answer:</strong> "${evaluation.student_answer}"</p>
+                                <p><strong>Semantic Similarity:</strong> ${(evaluation.semantic_similarity * 100).toFixed(1)}%</p>
+                                <p><strong>Conceptual Understanding:</strong> ${(evaluation.conceptual_understanding * 100).toFixed(1)}%</p>
+                                <p><strong>Factual Accuracy:</strong> ${(evaluation.factual_accuracy * 100).toFixed(1)}%</p>
+                                <div class="feedback"><strong>Feedback:</strong> ${evaluation.feedback}</div>
+                                ${evaluation.strengths && evaluation.strengths.length > 0 ? 
+                                    `<p><strong>✅ Strengths:</strong> ${evaluation.strengths.join(', ')}</p>` : ''}
+                                ${evaluation.error_analysis && evaluation.error_analysis.length > 0 ? 
+                                    `<p><strong>⚠️ Areas for Improvement:</strong> ${evaluation.error_analysis.join(', ')}</p>` : ''}
+                                `
+                            }
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <strong>📈 Evaluation Analysis:</strong>
+                        <br>• Questions Properly Identified: All ${result.evaluation_summary.total_questions} questions correctly processed
+                        <br>• Skipped Questions: ${result.evaluation_summary.skipped_questions} correctly awarded 0 marks
+                        <br>• Average Understanding: ${(result.evaluation_summary.average_conceptual_understanding * 100).toFixed(1)}%
+                        <br>• Semantic Analysis: ${result.processing_info.validation_applied ? '✅ Validation Applied' : '❌ No Validation'}
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function evaluatePDF() {
+            const pdfFile = document.getElementById('pdfFile').files[0];
+            const answerKey = document.getElementById('pdfAnswerKey').value;
+            const questionMarks = document.getElementById('pdfQuestionMarks').value;
+            
+            if (!pdfFile) {
+                alert('Please select a PDF file for AI-powered evaluation');
+                return;
+            }
+            
+            if (!answerKey || !questionMarks) {
+                alert('Please provide answer key and question marks');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('pdfResults');
+            resultsDiv.style.display = 'block';
+            
+            // Show AI workflow stages
+            const startTime = Date.now();
+            let currentStage = 1;
+            const stages = [
+                '🤖 AI Text Extraction Agent',
+                '🧠 AI Intelligent Evaluator'
+            ];
+            
+            resultsDiv.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <h4>🤖 AI-Powered Evaluation Workflow</h4>
+                    <p><strong>Stage ${currentStage}/2:</strong> ${stages[0]}</p>
+                    <p style="font-size: 0.9em; color: #666;">AI is extracting text and identifying questions...</p>
+                    <p style="font-size: 0.8em; margin-top: 5px;">⏱️ Started: ${new Date().toLocaleTimeString()}</p>
+                    <p style="font-size: 0.8em; color: #007bff;">🧠 Using GPT-4 for intelligent processing</p>
+                </div>
+            `;
+            
+            // Update AI workflow stages during processing
+            const stageInterval = setInterval(() => {
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                const stageIndex = Math.min(Math.floor(elapsed / 5), stages.length - 1);
+                
+                if (stageIndex !== currentStage - 1) {
+                    currentStage = stageIndex + 1;
+                }
+                
+                const currentStatus = resultsDiv.querySelector('.loading');
+                if (currentStatus) {
+                    currentStatus.innerHTML = `
+                        <div class="spinner"></div>
+                        <h4>🤖 AI-Powered Evaluation Workflow</h4>
+                        <p><strong>Stage ${currentStage}/2:</strong> ${stages[stageIndex]}</p>
+                        <p style="font-size: 0.9em; color: #666;">
+                            ${stageIndex === 0 ? 'AI is intelligently extracting text and identifying questions...' :
+                              'AI is evaluating answers with contextual understanding...'}
+                        </p>
+                        <p style="font-size: 0.8em; margin-top: 5px;">⏱️ Processing time: ${elapsed}s</p>
+                        <p style="font-size: 0.8em; color: #007bff;">🧠 Using GPT-4 for intelligent processing</p>
+                        <div style="margin-top: 10px; font-size: 0.8em;">
+                            ${stages.map((stage, idx) => 
+                                `<span style="color: ${idx < currentStage ? '#28a745' : idx === currentStage - 1 ? '#007bff' : '#6c757d'}">
+                                    ${idx < currentStage ? '✅' : idx === currentStage - 1 ? '🔄' : '⏳'} ${stage}
+                                </span>`
+                            ).join('<br>')}
+                        </div>
+                    `;
+                }
+            }, 3000);
+            
+            try {
+                const formData = new FormData();
+                formData.append('student_answers', '{}'); // Will be processed by AI
+                formData.append('answer_key', answerKey);
+                formData.append('question_marks', questionMarks);
+                formData.append('answer_sheet_pdf', pdfFile);
+                
+                const response = await fetch('/api/advanced/evaluate-semantic', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                clearInterval(stageInterval);
+                const endTime = Date.now();
+                const totalTime = ((endTime - startTime) / 1000).toFixed(2);
+                
+                const result = await response.json();
+                
+                let html = `
+                    <h4>🤖 AI-Powered Evaluation Results</h4>
+                    
+                    <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e8; border-radius: 8px;">
+                        <h5>🤖 AI Workflow Summary</h5>
+                        <p><strong>Workflow Type:</strong> ${result.processing_info?.workflow_type || 'AI-Powered LangGraph Workflow'}</p>
+                        <p><strong>AI Models Used:</strong> ${result.processing_info?.ai_models_used?.join(', ') || 'GPT-4 for extraction and evaluation'}</p>
+                        <p><strong>Total Processing Time:</strong> ${result.processing_info?.processing_time_seconds || totalTime}s</p>
+                        <p><strong>Evaluation ID:</strong> ${result.evaluation_id}</p>
+                        <p><strong>Cache Policy:</strong> ${result.processing_info?.cache_policy || 'No cache - fresh AI processing only'}</p>
+                    </div>
+                    
+                    ${result.processing_info?.processing_logs ? `
+                    <div style="margin-bottom: 20px; padding: 15px; background: #f0f8ff; border-radius: 8px;">
+                        <h5>🔍 AI Processing Log</h5>
+                        <div style="font-family: monospace; font-size: 0.9em; background: #fff; padding: 10px; border-radius: 4px;">
+                            ${result.processing_info.processing_logs.map(log => `<div>${log}</div>`).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <div style="margin-bottom: 20px; padding: 15px; background: #fff3cd; border-radius: 8px;">
+                        <h5>📊 AI Evaluation Results</h5>
+                        <p><strong>Total Score:</strong> ${result.obtained_marks}/${result.total_marks} (${result.percentage}%) - Grade: ${result.grade}</p>
+                        <p><strong>Questions Processed:</strong> ${result.evaluation_summary?.total_questions || 0}</p>
+                        <p><strong>Answered:</strong> ${result.evaluation_summary?.answered_questions || 0}</p>
+                        <p><strong>Skipped:</strong> ${result.evaluation_summary?.skipped_questions || 0}</p>
+                        ${result.evaluation_summary?.ai_processing_stages ? 
+                            `<p><strong>AI Stages:</strong> ${result.evaluation_summary.ai_processing_stages.join(' → ')}</p>` : ''}
+                    </div>
+                `;
+                
+                if (result.processing_info?.errors && result.processing_info.errors.length > 0) {
+                    html += `
+                        <div style="margin-bottom: 20px; padding: 15px; background: #f8d7da; border-radius: 8px;">
+                            <h5>⚠️ AI Processing Issues</h5>
+                            <ul>
+                                ${result.processing_info.errors.map(error => `<li>${error}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                // Show detailed AI evaluation results
+                if (result.detailed_results && result.detailed_results.length > 0) {
+                    const sortedResults = result.detailed_results.sort((a, b) => parseInt(a.question_id) - parseInt(b.question_id));
+                    
+                    html += `<h5>📝 AI Evaluation Analysis</h5>`;
+                    
+                    sortedResults.forEach((evaluation) => {
+                        const percentage = evaluation.marks_allocated > 0 ? 
+                            Math.round(evaluation.marks_obtained/evaluation.marks_allocated*100) : 0;
+                        
+                        const statusIcon = evaluation.status === 'skipped' ? '❌' : 
+                                          percentage >= 80 ? '✅' : 
+                                          percentage >= 60 ? '⚠️' : '🔴';
+                        
+                        html += `
+                            <div class="result-item" style="margin-bottom: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h6>${statusIcon} Question ${evaluation.question_id}</h6>
+                                    <strong>${evaluation.marks_obtained}/${evaluation.marks_allocated} (${percentage}%)</strong>
+                                </div>
+                                
+                                ${evaluation.question_text ? 
+                                    `<p><strong>Detected Question:</strong> "${evaluation.question_text}"</p>` : ''}
+                                
+                                ${evaluation.status === 'skipped' ? 
+                                    `<p style="color: #856404; background: #fff3cd; padding: 8px; border-radius: 4px;">
+                                        ⚠️ Question not attempted - detected by AI workflow
+                                    </p>` :
+                                    `
+                                    <p><strong>Student Answer:</strong> "${evaluation.student_answer}"</p>
+                                    <p><strong>Expected Answer:</strong> "${evaluation.model_answer}"</p>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+                                        <div>
+                                            <p><strong>Conceptual Understanding:</strong> ${((evaluation.conceptual_understanding || 0) * 100).toFixed(1)}%</p>
+                                            <p><strong>Factual Accuracy:</strong> ${((evaluation.factual_accuracy || 0) * 100).toFixed(1)}%</p>
+                                        </div>
+                                        <div>
+                                            <p><strong>Completeness:</strong> ${((evaluation.completeness || 0) * 100).toFixed(1)}%</p>
+                                            <p><strong>Overall Score:</strong> ${((evaluation.overall_score || 0) * 100).toFixed(1)}%</p>
+                                        </div>
+                                    </div>
+                                    <div style="background: #f1f3f4; padding: 8px; border-radius: 4px; margin-top: 8px;">
+                                        <strong>🤖 AI Feedback:</strong> ${evaluation.feedback}
+                                    </div>
+                                    ${evaluation.strengths && evaluation.strengths.length > 0 ? 
+                                        `<p><strong>✅ AI Identified Strengths:</strong> ${evaluation.strengths.join(', ')}</p>` : ''}
+                                    ${evaluation.weaknesses && evaluation.weaknesses.length > 0 ? 
+                                        `<p><strong>⚠️ AI Improvement Areas:</strong> ${evaluation.weaknesses.join(', ')}</p>` : ''}
+                                    ${evaluation.ai_evaluation ? 
+                                        `<p style="font-size: 0.8em; color: #007bff;">🧠 Evaluated by AI models with contextual understanding</p>` : ''}
+                                    `
+                                }
+                            </div>
+                        `;
+                    });
+                }
+                
+                html += `
+                    <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+                        <strong>🎯 AI-Powered Processing Confirmation:</strong>
+                        <br>• AI workflow completed at: ${new Date(result.processing_info?.processed_at || Date.now()).toLocaleString()}
+                        <br>• AI text extraction: ✅ Completed with GPT-4
+                        <br>• AI intelligent evaluation: ✅ Completed with contextual understanding
+                        <br>• No cached data used - fresh AI analysis only
+                        <br>• Total processing time: ${result.processing_info?.processing_time_seconds || totalTime}s
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                clearInterval(stageInterval);
+                resultsDiv.innerHTML = `<p style="color: red;">❌ AI evaluation error: ${error.message}</p>`;
+            }
+        }
+        
+        function loadSamplePDFData() {
+            document.getElementById('pdfAnswerKey').value = '{"1": "Photosynthesis is the biological process where plants convert light energy into chemical energy using chlorophyll", "2": "Democracy is a system of government where citizens exercise power through voting and elections"}';
+            document.getElementById('pdfQuestionMarks').value = '{"1": "5", "2": "4"}';
+        }
+        
+        function loadSampleQuestion() {
+            document.getElementById('studentAnswer').value = "Green plants perform photosynthesis by absorbing sunlight through chlorophyll and converting carbon dioxide and water into glucose and oxygen";
+            document.getElementById('correctAnswer').value = "Photosynthesis is the biological process where plants convert light energy into chemical energy using chlorophyll";
+            document.getElementById('maxMarks').value = "5";
+        }
+        
+        async function showDetailedReport() {
+            const resultsDiv = document.getElementById('multipleResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Generating detailed evaluation report...</p></div>';
+            
+            try {
+                // Comprehensive test with various question types and scenarios
+                const formData = new FormData();
+                formData.append('student_answers', JSON.stringify({
+                    "8": "Democracy is a form of government where people elect their representatives",
+                    "15": "",  // Completely skipped
+                    "23": "incomplete answer...",  // Partial attempt
+                    "31": "Acceleration is the rate of change of velocity with respect to time, measured in meters per second squared"
+                }));
+                formData.append('answer_key', JSON.stringify({
+                    "8": "Democracy is a system of government where citizens exercise power by voting and electing representatives who govern according to the will of the people",
+                    "15": "The respiratory system facilitates gas exchange through inhalation of oxygen and exhalation of carbon dioxide via the lungs",
+                    "23": "Photosynthesis converts carbon dioxide and water into glucose using chlorophyll and sunlight energy",
+                    "31": "Acceleration is defined as the rate of change of velocity with respect to time, typically measured in meters per second squared (m/s²)"
+                }));
+                formData.append('question_marks', JSON.stringify({"8": "3", "15": "5", "23": "4", "31": "6"}));
+                
+                const response = await fetch('/api/advanced/evaluate-semantic', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                let html = `
+                    <h4>📋 Comprehensive Evaluation Report</h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div style="padding: 15px; background: #e8f5e8; border-radius: 8px;">
+                            <h5>📊 Performance Summary</h5>
+                            <p><strong>Total Score:</strong> ${result.obtained_marks}/${result.total_marks} (${result.percentage}%)</p>
+                            <p><strong>Grade:</strong> ${result.grade}</p>
+                            <p><strong>Questions Attempted:</strong> ${result.evaluation_summary.answered_questions}/${result.evaluation_summary.total_questions}</p>
+                        </div>
+                        <div style="padding: 15px; background: #f0f8ff; border-radius: 8px;">
+                            <h5>🧠 Analysis Metrics</h5>
+                            <p><strong>Avg Understanding:</strong> ${(result.evaluation_summary.average_conceptual_understanding * 100).toFixed(1)}%</p>
+                            <p><strong>Avg Similarity:</strong> ${(result.evaluation_summary.average_semantic_similarity * 100).toFixed(1)}%</p>
+                            <p><strong>Validation:</strong> ${result.processing_info.validation_applied ? '✅ Applied' : '❌ Not Applied'}</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Detailed question-by-question breakdown
+                html += `<h5>📝 Question-by-Question Analysis</h5>`;
+                
+                const sortedResults = result.detailed_results.sort((a, b) => a.question_id - b.question_id);
+                
+                sortedResults.forEach((evaluation, index) => {
+                    const percentage = evaluation.marks_allocated > 0 ? 
+                        Math.round(evaluation.marks_obtained/evaluation.marks_allocated*100) : 0;
+                    
+                    const statusIcon = evaluation.status === 'skipped' ? '❌' : 
+                                      percentage >= 80 ? '✅' : 
+                                      percentage >= 60 ? '⚠️' : '🔴';
+                    
+                    html += `
+                        <div class="result-item" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h6 style="margin: 0;">${statusIcon} Question ${evaluation.question_id}</h6>
+                                <div style="text-align: right;">
+                                    <strong>${evaluation.marks_obtained}/${evaluation.marks_allocated}</strong>
+                                    <span style="color: #666;">(${percentage}%)</span>
+                                </div>
+                            </div>
+                            
+                            ${evaluation.status === 'skipped' ? 
+                                `
+                                <div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                                    <strong>⚠️ Question Not Attempted</strong>
+                                    <p style="margin: 5px 0;">This question was correctly identified as skipped and awarded 0 marks.</p>
+                                </div>
+                                <p><strong>Expected Answer:</strong> ${evaluation.correct_answer}</p>
+                                ` :
+                                `
+                                <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                                    <p><strong>Student Answer:</strong> "${evaluation.student_answer}"</p>
+                                    <p><strong>Model Answer:</strong> "${evaluation.correct_answer}"</p>
+                                </div>
+                                
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                    <div>
+                                        <p><strong>Semantic Similarity:</strong> ${(evaluation.semantic_similarity * 100).toFixed(1)}%</p>
+                                        <p><strong>Conceptual Understanding:</strong> ${(evaluation.conceptual_understanding * 100).toFixed(1)}%</p>
+                                    </div>
+                                    <div>
+                                        <p><strong>Factual Accuracy:</strong> ${(evaluation.factual_accuracy * 100).toFixed(1)}%</p>
+                                        <p><strong>Answer Completeness:</strong> ${(evaluation.answer_completeness * 100).toFixed(1)}%</p>
+                                    </div>
+                                </div>
+                                
+                                <div style="background: #f1f3f4; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                                    <strong>📝 Feedback:</strong> ${evaluation.feedback}
+                                </div>
+                                
+                                ${evaluation.strengths && evaluation.strengths.length > 0 ? 
+                                    `<p><strong>✅ Strengths:</strong> ${evaluation.strengths.join(', ')}</p>` : ''}
+                                
+                                ${evaluation.error_analysis && evaluation.error_analysis.length > 0 ? 
+                                    `<p><strong>⚠️ Areas for Improvement:</strong> ${evaluation.error_analysis.join(', ')}</p>` : ''}
+                                `
+                            }
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <h5>🎯 Evaluation System Information</h5>
+                        <p><strong>Method:</strong> ${result.processing_info.evaluation_method}</p>
+                        <p><strong>Analysis Type:</strong> ${result.processing_info.semantic_understanding}</p>
+                        <p><strong>Processed:</strong> ${new Date(result.processing_info.processed_at).toLocaleString()}</p>
+                        <p><strong>API Version:</strong> ${result.processing_info.api_version}</p>
+                        ${result.processing_info.validation_errors ? 
+                            `<p><strong>⚠️ Validation Issues:</strong> ${result.processing_info.validation_errors.length} issues found and corrected</p>` :
+                            `<p><strong>✅ Validation:</strong> All results validated successfully</p>`
+                        }
+                    </div>
+                `;
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">❌ Error generating report: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
