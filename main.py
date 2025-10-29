@@ -102,15 +102,15 @@ async def health_check():
 if __name__ == "__main__":
     try:
         print("🚀 Starting EvalMate Server...")
-        print("📍 Server will be available at: http://localhost:8080")
-        print("🔧 API Documentation: http://localhost:8080/docs")
-        print("🎯 Demo Page: http://localhost:8080/demo.html")
-        print("📱 Web App: http://localhost:8080/webapp.html")
+        print("📍 Server will be available at: http://localhost:8000")
+        print("🔧 API Documentation: http://localhost:8000/docs")
+        print("🎯 Demo Page: http://localhost:8000/demo.html")
+        print("📱 Web App: http://localhost:8000/webapp.html")
         
         uvicorn.run(
             "main:app",  # Use string reference for proper reload
-            host="localhost",  # Use localhost string instead of IP
-            port=8080,  # Use port 8080 to avoid conflicts
+            host="0.0.0.0",  # Use 0.0.0.0 for all interfaces
+            port=8000,  # Use port 8000 as requested
             reload=False,  # Disable reload for stability
             log_level="info"
         )
